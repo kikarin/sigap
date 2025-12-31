@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "title": "Aduan Masyarakat",
+    "description": "Sampaikan keluhan atau laporan Kamu agar dapat ditindaklanjuti dengan cepat.",
+    "icon": "pi pi-megaphone",
+    "bgColor": "bg-blue-100",
+    "iconColor": "text-blue-600",
+    "path": "/services/complaint"
+  },
+  {
+    "id": 2,
+    "title": "Buat KTP Baru",
+    "description": "Isi data diri Kamu secara online untuk memulai proses pembuatan KTP baru tanpa antre.",
+    "icon": "pi pi-id-card",
+    "bgColor": "bg-blue-100",
+    "iconColor": "text-blue-600",
+    "path": "/ktp/new"
+  },
+  {
+    "id": 3,
+    "title": "Buat Akta Kelahiran",
+    "description": "Buat dan tanda tangani surat pengantar secara online",
+    "icon": "pi pi-file-edit",
+    "bgColor": "bg-blue-100",
+    "iconColor": "text-blue-600",
+    "path": "/birth-certificate"
+  },
+  {
+    "id": 4,
+    "title": "Bayar Pajak Kendaraan",
+    "description": "Bayar pajak kendaraan Anda secara mudah, cepat dan dari aplikasi",
+    "icon": "pi pi-car",
+    "bgColor": "bg-blue-100",
+    "iconColor": "text-blue-600",
+    "path": "/vehicle-tax"
+  },
+  {
+    "id": 5,
+    "title": "Izin Usaha",
+    "description": "Ajukan permohonan izin usaha secara online tanpa perlu datang ke kantor",
+    "icon": "pi pi-briefcase",
+    "bgColor": "bg-green-100",
+    "iconColor": "text-green-600",
+    "path": "/business-license"
+  }
+]
