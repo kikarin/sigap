@@ -26,7 +26,8 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   css: [
-    fileURLToPath(new URL("./assets/css/main.css", import.meta.url))
+    fileURLToPath(new URL("./assets/css/main.css", import.meta.url)),
+    "leaflet/dist/leaflet.css",
   ],
 
   modules: ["@primevue/nuxt-module", "@nuxt/image"],

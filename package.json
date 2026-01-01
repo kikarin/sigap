@@ -13,6 +13,7 @@
     "@nuxt/image": "^2.0.0",
     "@primeuix/themes": "^2.0.2",
     "@tailwindcss/vite": "^4.1.18",
+    "leaflet": "^1.9.4",
     "nuxt": "^4.2.2",
     "primeicons": "^7.0.0",
     "primevue": "^4.5.4",
