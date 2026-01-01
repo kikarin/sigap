@@ -11,7 +11,7 @@ const MyCustomTheme = definePreset(Aura, {
       200: "#c7d2fe",
       300: "#a5b4fc",
       400: "#818cf8",
-      500: "#2F52BD",
+      500: "#1053E1",
       600: "#1e3a8a",
       700: "#1e40af",
       800: "#1e3a8a",
@@ -31,6 +31,16 @@ export default defineNuxtConfig({
   ],
 
   modules: ["@primevue/nuxt-module", "@nuxt/image"],
+
+  runtimeConfig: {
+    // Private keys (only available on server-side)
+    apiSecret: '',
+    
+    public: {
+      apiBaseUrl: (import.meta as any).env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
+      apiDomain: (import.meta as any).env.NUXT_PUBLIC_API_DOMAIN || 'https://sigap.summitct.co.id',
+    }
+  },
 
   primevue: {
     options: {

@@ -6,65 +6,125 @@
           <i class="pi pi-user text-blue-500" style="font-size: 2.5rem"></i>
         </div>
         <div class="mt-5">
-          <p class="text-base font-bold">{{ user.name }}</p>
-          <p class="text-xs text-gray-500">{{ user.email }}</p>
+          <p class="text-base font-bold">{{ profileData?.nama || userData?.name || 'User' }}</p>
+          <p class="text-xs text-gray-500">{{ userData?.email || '' }}</p>
+          <p v-if="profileData?.nik" class="text-xs text-gray-400 mt-1">NIK: {{ profileData.nik }}</p>
         </div>
       </div>
     </div>
     <div class="mt-10 space-y-5 p-5">
-      <Card class="border border-gray-200">
+      <Card class="border border-gray-200" v-if="profileData">
         <template #content>
-          <div class="flex gap-2 flex-col">
-            <button
-              v-for="item in items"
-              :key="item.label"
-              class="flex-1 p-2 hover:cursor-pointer flex items-center justify-between text-center"
-            >
-              <div class="flex gap-2 items-center">
-                <i
-                  :class="item.icon"
-                  style="font-size: 1.5rem"
-                  class="text-blue-500"
-                ></i>
-                <p class="text-sm text-gray-500">
-                  {{ item.label }}
-                </p>
-              </div>
-              <i class="pi pi-angle-right text-blue-500"></i>
-            </button>
+          <div class="space-y-3">
+            <div v-if="profileData.tempat_lahir || profileData.tanggal_lahir" class="flex flex-col gap-2">
+              <p class="text-xs text-gray-500">Tempat, Tanggal Lahir</p>
+              <p class="text-sm">{{ profileData.tempat_lahir || '-' }}, {{ profileData.tanggal_lahir || '-' }}</p>
+            </div>
+            <div v-if="profileData.jenis_kelamin" class="flex flex-col gap-2">
+              <p class="text-xs text-gray-500">Jenis Kelamin</p>
+              <p class="text-sm">{{ profileData.jenis_kelamin }}</p>
+            </div>
+            <div v-if="profileData.kartu_keluarga" class="flex flex-col gap-2">
+              <p class="text-xs text-gray-500">Kartu Keluarga</p>
+              <p class="text-sm">{{ profileData.kartu_keluarga }}</p>
+            </div>
           </div>
         </template>
       </Card>
 
       <Card class="border-gray-200 border">
         <template #content>
-          <button
-            class="w-full hover:cursor-pointer flex justify-between items-center text-center text-sm text-red-500"
-          >
-            <div class="flex gap-2 justify-center items-center">
-              <i class="pi pi-sign-out"></i>
-              <h1>Logout</h1>
-            </div>
-            <i class="pi pi-angle-right"></i>
-          </button>
+          <Button
+            label="Logout"
+            icon="pi pi-sign-out"
+            class="w-full"
+            severity="danger"
+            outlined
+            @click="showLogoutDialog = true"
+          />
         </template>
       </Card>
     </div>
   </div>
+
+  <!-- Logout Confirmation Dialog -->
+  <Dialog
+    v-model:visible="showLogoutDialog"
+    modal
+    header="Konfirmasi Logout"
+    :style="{ width: '90%', maxWidth: '400px' }"
+  >
+    <p>Apakah Anda yakin ingin logout?</p>
+    <template #footer>
+      <Button
+        label="Batal"
+        severity="secondary"
+        outlined
+        @click="showLogoutDialog = false"
+      />
+      <Button
+        label="Logout"
+        severity="danger"
+        @click="handleLogout"
+        :loading="logoutLoading"
+      />
+    </template>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
-import { Card } from "primevue";
+import { Card, Dialog } from "primevue";
 
-const user = {
-  name: "John Doe",
-  email: "john.doe@example.com",
-};
+const { user: userData, logout } = useAuth()
+const { get } = useApi()
+const router = useRouter()
+const toast = useToast()
 
-const items = [
-  { label: "Account Settings", icon: "pi pi-cog" },
-  { label: "Language", icon: "pi pi-globe" },
-  { label: "Terms & Conditions", icon: "pi pi-file" },
-  { label: "Privacy Policy", icon: "pi pi-shield" },
-];
+const profileData = ref<any>(null)
+const showLogoutDialog = ref(false)
+const logoutLoading = ref(false)
+
+// Fetch profile data
+onMounted(async () => {
+  try {
+    const response = await get('/profile')
+    if (response.success && response.data) {
+      profileData.value = response.data
+    }
+  } catch (error: any) {
+    toast.add({
+      severity: 'error',
+      summary: 'Gagal',
+      detail: error.response?.message || error.message || 'Gagal memuat data profile',
+      life: 3000
+    })
+  }
+})
+
+const handleLogout = async () => {
+  logoutLoading.value = true
+  
+  try {
+    await logout()
+    
+    toast.add({
+      severity: 'success',
+      summary: 'Berhasil',
+      detail: 'Logout berhasil',
+      life: 3000
+    })
+    
+    showLogoutDialog.value = false
+    router.push('/auth')
+  } catch (error: any) {
+    toast.add({
+      severity: 'error',
+      summary: 'Gagal',
+      detail: error.response?.message || error.message || 'Gagal logout',
+      life: 3000
+    })
+  } finally {
+    logoutLoading.value = false
+  }
+}
 </script>

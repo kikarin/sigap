@@ -30,12 +30,12 @@
       </div>
     </div>
     <div class="flex items-center gap-3">
-      <NuxtLink
-        to="/services/complaint"
+      <button
+        @click="goBack"
         class="inline-flex p-4 hover:cursor-pointer shrink-0 rounded-full border items-center justify-center border-gray-300 shadow-xl"
       >
         <i class="pi pi-arrow-left text-xl leading-none"></i>
-      </NuxtLink>
+      </button>
       <NuxtLink to="/services/complaint/location" class="w-full">
         <Button
           label="Selanjutnya"
@@ -48,7 +48,27 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from "vue";
+
+const router = useRouter()
+const { formData } = useAduanForm()
+
+const value = ref(formData.value.judul || '')
+const description = ref(formData.value.detail_aduan || '')
+
+watch(value, (newVal) => {
+  formData.value.judul = newVal
+})
+
+watch(description, (newVal) => {
+  formData.value.detail_aduan = newVal
+})
+
+const goBack = () => {
+  router.back()
+}
+
 definePageMeta({
   layout: "complaint-layout",
 });

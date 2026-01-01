@@ -1,17 +1,31 @@
 <template>
-  <div class="px-5">
-    <div class="space-y-5 py-5 sticky top-0 bg-white border-b border-gray-200 bottom-shadow-md ">
-      <div class="flex gap-2 items-center">
-        <i class="pi pi-arrow-left"></i>
-        <h1 class="font-semibold text-xl">Layanan</h1>
-      </div>
-      <div class="relative">
-        <i class="pi pi-search absolute right-3 top-3 text-gray-400"></i>
-        <InputText placeholder="Search..." class="w-full pl-20" />
+  <div class="min-h-full mx-auto my-auto">
+    <div class="bg-white top-0 z-10 border-b border-gray-200 shadow-sm">
+      <div class="px-5 py-4">
+        <div class="flex items-center gap-3 mb-4">
+          <h1 class="font-semibold text-xl text-gray-800">Layanan</h1>
+        </div>
+        <div class="relative">
+          <InputText
+            v-model="searchQuery"
+            placeholder="Search..."
+            class="w-full pl-4 pr-10 py-2.5"
+          />
+          <i class="pi pi-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+        </div>
       </div>
     </div>
-    <Service />
+    <div class="px-5 py-5">
+      <Service :search-query="searchQuery" />
+    </div>
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const router = useRouter()
+const searchQuery = ref('')
+
+const goBack = () => {
+  router.back()
+}
+</script>

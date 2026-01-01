@@ -31,33 +31,57 @@
           </div>
         </div>
       </div>
+      
+      <div class="flex flex-col gap-2">
+        <label for="alasan-melaporkan" class="text-gray-700 text-sm font-medium">
+          Alasan Melaporkan
+        </label>
+        <Textarea
+          id="alasan-melaporkan"
+          v-model="alasanMelaporkan"
+          rows="4"
+          autoResize
+          placeholder="Jelaskan alasan Anda melaporkan aduan ini..."
+          class="w-full"
+        />
+      </div>
     </div>
     <div class="flex items-center mb-5 gap-3">
-      <NuxtLink
-        to="/services/complaint/detail"
+      <button
+        @click="goBack"
         class="inline-flex p-4 hover:cursor-pointer shrink-0 rounded-full border items-center justify-center border-gray-300 shadow-xl"
       >
         <i class="pi pi-arrow-left text-xl leading-none"></i>
-      </NuxtLink>
-      <NuxtLink to="/services/complaint/verification" class="w-full">
-        <Button
-          label="Selanjutnya"
-          class="w-full text-white font-semibold rounded-full shadow-lg transition-colors"
-          rounded
-          size="large"
-        />
-      </NuxtLink>
+      </button>
+      <Button
+        label="Submit"
+        class="w-full text-white font-semibold rounded-full shadow-lg transition-colors"
+        rounded
+        size="large"
+        :loading="loading"
+        :disabled="loading"
+        @click="handleSubmit"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
+import { useToast } from "primevue/usetoast";
 
-const selectedCategory = ref("public");
+const router = useRouter()
+const toast = useToast()
+const { formData, resetForm } = useAduanForm()
+const { createAduan } = useAduan()
+
+const selectedCategory = ref(formData.value.jenis_aduan || "publik");
+const alasanMelaporkan = ref(formData.value.alasan_melaporkan || '')
+const loading = ref(false)
+
 const complaintVisibilityOptions = [
   {
-    id: "public",
+    id: "publik",
     label: "Public",
     description:
       "Your complaint will be visible to other users. Suitable for public issues such as damaged roads, broken street lights, etc.",
@@ -65,7 +89,7 @@ const complaintVisibilityOptions = [
     isPublic: true,
   },
   {
-    id: "private",
+    id: "pengaduan",
     label: "Private / Confidential",
     description:
       "Your complaint will only be visible to you and authorized officers. Suitable for sensitive or personal reports.",
@@ -73,6 +97,121 @@ const complaintVisibilityOptions = [
     isPublic: false,
   },
 ];
+
+watch(selectedCategory, (newVal) => {
+  formData.value.jenis_aduan = newVal
+})
+
+watch(alasanMelaporkan, (newVal) => {
+  formData.value.alasan_melaporkan = newVal
+})
+
+const goBack = () => {
+  router.back()
+}
+
+const handleSubmit = async () => {
+  // Validasi form
+  if (!formData.value.kategori_aduan_id) {
+    toast.add({
+      severity: "warn",
+      summary: "Peringatan",
+      detail: "Mohon pilih kategori aduan",
+      life: 3000,
+    });
+    return
+  }
+
+  if (!formData.value.judul || !formData.value.detail_aduan) {
+    toast.add({
+      severity: "warn",
+      summary: "Peringatan",
+      detail: "Mohon lengkapi judul dan deskripsi aduan",
+      life: 3000,
+    });
+    return
+  }
+
+  if (!formData.value.latitude || !formData.value.longitude) {
+    toast.add({
+      severity: "warn",
+      summary: "Peringatan",
+      detail: "Mohon pilih titik lokasi",
+      life: 3000,
+    });
+    return
+  }
+
+  if (!formData.value.kecamatan_id || !formData.value.desa_id) {
+    toast.add({
+      severity: "warn",
+      summary: "Peringatan",
+      detail: "Mohon pilih kecamatan dan kelurahan",
+      life: 3000,
+    });
+    return
+  }
+
+  if (!formData.value.deskripsi_lokasi) {
+    toast.add({
+      severity: "warn",
+      summary: "Peringatan",
+      detail: "Mohon isi deskripsi lokasi",
+      life: 3000,
+    });
+    return
+  }
+
+  loading.value = true
+
+  try {
+    const response = await createAduan({
+      kategori_aduan_id: formData.value.kategori_aduan_id,
+      judul: formData.value.judul,
+      detail_aduan: formData.value.detail_aduan,
+      latitude: formData.value.latitude,
+      longitude: formData.value.longitude,
+      nama_lokasi: formData.value.nama_lokasi,
+      kecamatan_id: formData.value.kecamatan_id,
+      desa_id: formData.value.desa_id,
+      deskripsi_lokasi: formData.value.deskripsi_lokasi,
+      jenis_aduan: formData.value.jenis_aduan,
+      alasan_melaporkan: formData.value.alasan_melaporkan || '',
+      files: formData.value.files || []
+    })
+
+    if (response.success) {
+      toast.add({
+        severity: "success",
+        summary: "Berhasil",
+        detail: response.message || "Aduan berhasil dikirim",
+        life: 3000,
+      });
+      
+      // Reset form
+      resetForm()
+      
+      // Redirect to complaint list after submit
+      setTimeout(() => {
+        router.push('/services/complaint/masyarakat')
+      }, 1500)
+    }
+  } catch (error) {
+    const err = error || {}
+    const errorMessage = (err.response && err.response.message) || err.message || 'Terjadi kesalahan saat mengirim aduan'
+    const errors = (err.response && err.response.errors) || null
+
+    toast.add({
+      severity: "error",
+      summary: "Gagal",
+      detail: errors ? Object.values(errors).flat().join(', ') : errorMessage,
+      life: 5000,
+    });
+  } finally {
+    loading.value = false
+  }
+}
+
 definePageMeta({
   layout: "complaint-layout",
 });

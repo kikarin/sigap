@@ -1,13 +1,13 @@
 <template>
-  <div class="relative h-96 -mt-26 px-4 z-20">
-    <div class="bg-white overflow-y-scroll rounded-t-2xl h-full flex flex-col gap-5  shadow-lg p-6 mx-auto max-w-md">
-      <div>
-        <h2 class="font-bold text-lg text-gray-800 mb-1">
+  <div class="relative -mt-30 px-4 z-20 ">
+    <div class="bg-white rounded-t-3xl shadow-lg p-5 mx-auto max-w-md">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 flex items-center justify-center">
+          <i class="pi pi-thumbs-up text-primary-500 text-lg"></i>
+        </div>
+        <h2 class="font-bold text-lg text-gray-800">
           Layanan Populer
         </h2>
-        <p class="text-sm text-gray-600">
-          Jelajahi layanan publik yang sering digunakan oleh masyarakat
-        </p>
       </div>
       <Service />
     </div>

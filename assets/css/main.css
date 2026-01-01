@@ -15,3 +15,70 @@
   --color-primary-900: #172554;
   --color-primary-950: #0f172a;
 }
+
+/* Mobile Toast Styling */
+.p-toast {
+  width: 90% !important;
+  max-width: 400px !important;
+}
+
+.p-toast-message {
+  min-width: 100% !important;
+  padding: 1.25rem 1.5rem !important;
+  font-size: 1rem !important;
+  margin: 0.5rem 0 !important;
+}
+
+.p-toast-message-content {
+  padding: 0 !important;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.p-toast-summary {
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.5rem !important;
+  line-height: 1.4;
+}
+
+.p-toast-detail {
+  font-size: 0.95rem !important;
+  line-height: 1.5 !important;
+  margin: 0 !important;
+}
+
+.p-toast-icon {
+  font-size: 1.5rem !important;
+  margin-right: 0.75rem !important;
+}
+
+@media (max-width: 640px) {
+  .p-toast {
+    width: 95% !important;
+  }
+  
+  .p-toast-message {
+    padding: 1.5rem 1.75rem !important;
+    font-size: 1.05rem !important;
+  }
+  
+  .p-toast-summary {
+    font-size: 1.15rem !important;
+  }
+  
+  .p-toast-detail {
+    font-size: 1rem !important;
+  }
+}
+
+/* Scrollbar Hide */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

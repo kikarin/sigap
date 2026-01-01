@@ -3,45 +3,32 @@
     "id": 1,
     "title": "Aduan Masyarakat",
     "description": "Sampaikan keluhan atau laporan Kamu agar dapat ditindaklanjuti dengan cepat.",
-    "icon": "pi pi-megaphone",
+    "image": "/marketing.png",
     "bgColor": "bg-blue-100",
-    "iconColor": "text-blue-600",
-    "path": "/services/complaint"
+    "path": "/services/aduan"
   },
   {
     "id": 2,
-    "title": "Buat KTP Baru",
-    "description": "Isi data diri Kamu secara online untuk memulai proses pembuatan KTP baru tanpa antre.",
-    "icon": "pi pi-id-card",
+    "title": "Layanan Surat",
+    "description": "Layanan surat yang dapat kamu akses secara online tanpa perlu datang ke kantor.",
+    "image": "/email-and-file.png",
     "bgColor": "bg-blue-100",
-    "iconColor": "text-blue-600",
-    "path": "/ktp/new"
+    "path": "/services/letter"
   },
   {
     "id": 3,
-    "title": "Buat Akta Kelahiran",
-    "description": "Buat dan tanda tangani surat pengantar secara online",
-    "icon": "pi pi-file-edit",
+    "title": "Pengajuan Proposal",
+    "description": "Pengajuan proposal yang dapat kamu akses secara online tanpa perlu datang ke kantor.",
+    "image": "/business-report.png",
     "bgColor": "bg-blue-100",
-    "iconColor": "text-blue-600",
-    "path": "/birth-certificate"
+    "path": "/services/proposal"
   },
   {
     "id": 4,
-    "title": "Bayar Pajak Kendaraan",
+    "title": "Cek Program Bantuan",
     "description": "Bayar pajak kendaraan Anda secara mudah, cepat dan dari aplikasi",
-    "icon": "pi pi-car",
+    "image": "/hold-rupiah-coin.png",
     "bgColor": "bg-blue-100",
-    "iconColor": "text-blue-600",
     "path": "/vehicle-tax"
-  },
-  {
-    "id": 5,
-    "title": "Izin Usaha",
-    "description": "Ajukan permohonan izin usaha secara online tanpa perlu datang ke kantor",
-    "icon": "pi pi-briefcase",
-    "bgColor": "bg-green-100",
-    "iconColor": "text-green-600",
-    "path": "/business-license"
   }
 ]
