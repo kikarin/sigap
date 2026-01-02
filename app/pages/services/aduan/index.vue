@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-screen bg-primary-500 pb-20">
+  <div class="h-full flex flex-col bg-primary-500 ">
     <!-- Blue Header Section -->
-    <div class="relative bg-primary-500 pt-12 pb-8 px-5">
+    <div class="relative bg-primary-500 mt-5 pb-10 px-5">
       <button
         @click="goBack"
         class="mb-4 flex items-center justify-center w-10 h-10 rounded-full hover:bg-primary-600 transition-colors"
@@ -27,7 +27,7 @@
     </div>
 
     <!-- White Cards Section -->
-    <div class="bg-white rounded-t-3xl -mt-6 px-5 pt-8 pb-6 min-h-[60vh]">
+    <div class="bg-white rounded-t-4xl z-10 flex-1 px-5 pt-16 pb-6 ">
       <div class="flex flex-col gap-4">
         <!-- Card 1: Aduan Mayarakat -->
         <NuxtLink

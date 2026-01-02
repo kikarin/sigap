@@ -36,18 +36,19 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  searchQuery: ''
+  searchQuery: "",
 });
 
 const filteredServices = computed(() => {
   if (!props.searchQuery) {
     return pathService as any[];
   }
-  
+
   const query = props.searchQuery.toLowerCase();
-  return (pathService as any[]).filter((service: any) => 
-    service.title.toLowerCase().includes(query) ||
-    service.description.toLowerCase().includes(query)
+  return (pathService as any[]).filter(
+    (service: any) =>
+      service.title.toLowerCase().includes(query) ||
+      service.description.toLowerCase().includes(query)
   );
 });
 </script>
