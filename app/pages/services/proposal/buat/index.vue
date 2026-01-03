@@ -1,15 +1,7 @@
 <template>
   <div class="p-4 h-full flex space-y-5 flex-col">
     <div class="space-y-3 flex-1 ">
-      <div class="flex items-center gap-2">
-        <button
-          @click="goBack"
-          class="p-1 h-12 w-12 rounded-full transition-colors hover:bg-gray-100"
-        >
-          <i class="pi pi-arrow-left text-black text-xl"></i>
-        </button>
-        <p class="text-lg font-semibold">Buat Proposal</p>
-      </div>
+      <DynamicHeader title="Buat Proposal" />
       <div>
         <h1 class="font-bold text-xl">
           Catat kegiatan tanggung jawab secara jelas dan akurat.

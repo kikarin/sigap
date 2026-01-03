@@ -1,5 +1,5 @@
 <template>
-  <div class="p-2">
+  <div class="p-4">
     <DynamicHeader title="Kegiatan" />
     <div class="p-5 space-y-3">
       <div class="flex flex-col gap-1">
