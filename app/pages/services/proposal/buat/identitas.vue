@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col w-full h-full">
+  <div class="flex p-4 flex-col w-full h-full">
     <div class="flex-1">
       <DynamicHeader title="Identitas Pemohon" />
       <div class="p-5 space-y-3">
