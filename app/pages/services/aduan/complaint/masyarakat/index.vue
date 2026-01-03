@@ -123,7 +123,7 @@
         class="shadow-lg"
         rounded
         size="large"
-        @click="router.push('/services/complaint/category')"
+        @click="router.push('/services/aduan/complaint/category')"
       />
     </div>
   </div>
@@ -256,7 +256,7 @@ const loadMore = () => {
 }
 
 const viewDetail = (id) => {
-  router.push(`/services/complaint/masyarakat/${id}`)
+  router.push(`/services/aduan/complaint/masyarakat/${id}`)
 }
 
 const formatStatus = (status) => {
@@ -334,7 +334,7 @@ const handleShare = async (aduan) => {
   const shareData = {
     title: aduan.judul,
     text: aduan.judul,
-    url: `${window.location.origin}/services/complaint/masyarakat/${aduan.id}`
+    url: `${window.location.origin}/services/aduan/complaint/masyarakat/${aduan.id}`
   }
 
   try {

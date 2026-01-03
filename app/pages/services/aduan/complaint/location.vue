@@ -42,15 +42,14 @@
       >
         <i class="pi pi-arrow-left text-xl leading-none"></i>
       </button>
-      <Button
-        label="Submit"
-        class="w-full text-white font-semibold rounded-full shadow-lg transition-colors"
-        rounded
-        size="large"
-        :loading="loading"
-        :disabled="loading"
-        @click="handleSubmit"
-      />
+      <NuxtLink to="/services/aduan/complaint/verification" class="w-full">
+        <Button
+          label="Selanjutnya"
+          class="w-full text-white font-semibold rounded-full shadow-lg transition-colors"
+          rounded
+          size="large"
+        />
+      </NuxtLink>
     </div>
   </div>
 

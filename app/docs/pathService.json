@@ -13,7 +13,7 @@
     "description": "Layanan surat yang dapat kamu akses secara online tanpa perlu datang ke kantor.",
     "image": "/email-and-file.png",
     "bgColor": "bg-blue-100",
-    "path": "/services/letter"
+    "path": "/services/surat"
   },
   {
     "id": 3,
