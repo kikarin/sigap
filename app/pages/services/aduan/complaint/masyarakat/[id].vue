@@ -468,7 +468,6 @@ const fetchDetail = async (forceRefresh = false) => {
       detail: errorMessage,
       life: 3000
     })
-    router.back()
   } finally {
     loading.value = false
   }
@@ -593,7 +592,6 @@ const onLocationSelected = async (location) => {
       }
     }
   } catch (error) {
-    console.error('Reverse geocode error:', error)
     editData.value.nama_lokasi = `Lokasi Aduan (${location.lat.toFixed(6)}, ${location.lng.toFixed(6)})`
   } finally {
     reverseGeocodingLoading.value = false
@@ -609,7 +607,7 @@ const saveEdit = async () => {
     const deletedFiles = Array.isArray(editData.value.deletedFiles) ? editData.value.deletedFiles : []
     const newFiles = Array.isArray(editData.value.files) ? editData.value.files : []
     
-    const response = await updateAduan(aduan.value.id, {
+    const updatePayload = {
       kategori_aduan_id: editData.value.kategori_aduan_id,
       judul: editData.value.judul,
       detail_aduan: editData.value.detail_aduan,
@@ -621,9 +619,18 @@ const saveEdit = async () => {
       alasan_melaporkan: editData.value.alasan_melaporkan || '',
       files: newFiles,
       deleted_files: deletedFiles
-    })
+    }
+    
+    const response = await updateAduan(aduan.value.id, updatePayload)
     
     if (response.success) {
+      if (response.data) {
+        aduan.value = {
+          ...response.data,
+          files: response.data.files ? [...response.data.files] : []
+        }
+      }
+      
       toast.add({
         severity: 'success',
         summary: 'Berhasil',
@@ -633,12 +640,20 @@ const saveEdit = async () => {
       
       isEditMode.value = false
       editData.value = {}
+      showMapDialog.value = false
       
-      aduan.value = null
       await nextTick()
       
-      await new Promise(resolve => setTimeout(resolve, 300))
-      await fetchDetail(true)
+      if (!response.data) {
+        await fetchDetail(true)
+      }
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Gagal',
+        detail: response.message || 'Aduan gagal diupdate',
+        life: 3000
+      })
     }
   } catch (error) {
     const err = error || {}
@@ -751,7 +766,7 @@ const handleDelete = async () => {
         detail: response.message || 'Aduan berhasil dihapus',
         life: 3000
       })
-      router.push('/services/complaint/masyarakat')
+      router.push('/services/aduan/complaint/masyarakat')
     }
   } catch (error) {
     const err = error || {}

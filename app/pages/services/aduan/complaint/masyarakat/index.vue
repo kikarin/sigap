@@ -176,7 +176,6 @@ const fetchKategori = async () => {
       }))
     }
   } catch (error) {
-    console.error('Error fetching kategori:', error)
   }
 }
 
