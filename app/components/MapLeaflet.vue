@@ -131,7 +131,7 @@ onUnmounted(() => {
     marker = null
   }
 })
-</script>
+</script>   
 
 <style>
 .leaflet-container {

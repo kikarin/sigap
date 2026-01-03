@@ -182,11 +182,8 @@ const fetchSurat = async (page = 0, append = false) => {
 
     const response = await getListPengajuanSurat(params)
     
-    console.log('Response dari API:', response)
-    
     if (response && response.success) {
       if (response.data && Array.isArray(response.data)) {
-        console.log('Data surat:', response.data)
         if (append) {
           suratList.value = [...suratList.value, ...response.data]
         } else {
@@ -195,17 +192,13 @@ const fetchSurat = async (page = 0, append = false) => {
         
         meta.value = response.meta || {}
         hasMore.value = meta.value.current_page < Math.ceil(meta.value.total / meta.value.per_page)
-        console.log('suratList setelah update:', suratList.value)
       } else {
-        console.log('Response data bukan array atau kosong')
         suratList.value = []
       }
     } else {
-      console.log('Response tidak success atau tidak ada response')
       suratList.value = []
     }
   } catch (error) {
-    console.error('Error fetchSurat:', error)
     const err = error || {}
     const errorMessage = (err.response && err.response.message) || err.message || 'Gagal memuat data surat'
     toast.add({

@@ -142,16 +142,6 @@ const handleSubmit = async () => {
     return
   }
 
-  if (!formData.value.kecamatan_id || !formData.value.desa_id) {
-    toast.add({
-      severity: "warn",
-      summary: "Peringatan",
-      detail: "Mohon pilih kecamatan dan kelurahan",
-      life: 3000,
-    });
-    return
-  }
-
   if (!formData.value.deskripsi_lokasi) {
     toast.add({
       severity: "warn",
@@ -172,8 +162,6 @@ const handleSubmit = async () => {
       latitude: formData.value.latitude,
       longitude: formData.value.longitude,
       nama_lokasi: formData.value.nama_lokasi,
-      kecamatan_id: formData.value.kecamatan_id,
-      desa_id: formData.value.desa_id,
       deskripsi_lokasi: formData.value.deskripsi_lokasi,
       jenis_aduan: formData.value.jenis_aduan,
       alasan_melaporkan: formData.value.alasan_melaporkan || '',
@@ -193,7 +181,7 @@ const handleSubmit = async () => {
       
       // Redirect to complaint list after submit
       setTimeout(() => {
-        router.push('/services/complaint/masyarakat')
+        router.push('/services/aduan/complaint/masyarakat')
       }, 1500)
     }
   } catch (error) {
