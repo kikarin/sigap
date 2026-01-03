@@ -42,8 +42,6 @@ export const useAduan = () => {
     latitude: number
     longitude: number
     nama_lokasi: string
-    kecamatan_id: number
-    desa_id: number
     deskripsi_lokasi: string
     jenis_aduan: string
     alasan_melaporkan?: string
@@ -57,8 +55,6 @@ export const useAduan = () => {
     formData.append('latitude', data.latitude.toString())
     formData.append('longitude', data.longitude.toString())
     formData.append('nama_lokasi', data.nama_lokasi)
-    formData.append('kecamatan_id', data.kecamatan_id.toString())
-    formData.append('desa_id', data.desa_id.toString())
     formData.append('deskripsi_lokasi', data.deskripsi_lokasi)
     formData.append('jenis_aduan', data.jenis_aduan)
     if (data.alasan_melaporkan) {
@@ -107,8 +103,6 @@ export const useAduan = () => {
     latitude?: number
     longitude?: number
     nama_lokasi?: string
-    kecamatan_id?: number
-    desa_id?: number
     deskripsi_lokasi?: string
     jenis_aduan?: string
     alasan_melaporkan?: string
@@ -129,8 +123,6 @@ export const useAduan = () => {
       if (data.latitude !== undefined) formData.append('latitude', data.latitude.toString())
       if (data.longitude !== undefined) formData.append('longitude', data.longitude.toString())
       if (data.nama_lokasi) formData.append('nama_lokasi', data.nama_lokasi)
-      if (data.kecamatan_id !== undefined) formData.append('kecamatan_id', data.kecamatan_id.toString())
-      if (data.desa_id !== undefined) formData.append('desa_id', data.desa_id.toString())
       if (data.deskripsi_lokasi) formData.append('deskripsi_lokasi', data.deskripsi_lokasi)
       if (data.jenis_aduan) formData.append('jenis_aduan', data.jenis_aduan)
       if (data.alasan_melaporkan) formData.append('alasan_melaporkan', data.alasan_melaporkan)
@@ -188,23 +180,13 @@ export const useAduan = () => {
     return get('/aduan-masyarakat/kategori')
   }
 
-  const getKecamatan = async () => {
-    return get('/aduan-masyarakat/kecamatan')
-  }
-
-  const getDesa = async (kecamatanId: number) => {
-    return get(`/aduan-masyarakat/desa/${kecamatanId}`)
-  }
-
   return {
     getListAduan,
     getDetailAduan,
     createAduan,
     updateAduan,
     deleteAduan,
-    getKategoriAduan,
-    getKecamatan,
-    getDesa
+    getKategoriAduan
   }
 }
 

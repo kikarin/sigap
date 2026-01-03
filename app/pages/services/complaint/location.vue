@@ -16,40 +16,6 @@
             @click="showMapDialog = true"
           />
         </div>
-        
-        <!-- Kecamatan -->
-        <div class="flex flex-col gap-2">
-          <label for="kecamatan" class="text-gray-700 text-sm">
-            Kecamatan <span class="text-red-500">*</span>
-          </label>
-          <Select
-            id="kecamatan"
-            v-model="selectedKecamatan"
-            :options="kecamatanList"
-            optionLabel="name"
-            placeholder="Pilih kecamatan"
-            class="w-full"
-            :loading="loadingKecamatan"
-            @change="onKecamatanChange"
-          />
-        </div>
-
-        <!-- Kelurahan/Desa -->
-        <div class="flex flex-col gap-2">
-          <label for="kelurahan" class="text-gray-700 text-sm">
-            Kelurahan/Desa <span class="text-red-500">*</span>
-          </label>
-          <Select
-            id="kelurahan"
-            v-model="selectedKelurahan"
-            :options="kelurahanList"
-            optionLabel="name"
-            placeholder="Pilih kelurahan/desa"
-            class="w-full"
-            :disabled="!selectedKecamatan || loadingKelurahan"
-            :loading="loadingKelurahan"
-          />
-        </div>
 
         <!-- Deskripsi Lokasi Tambahan -->
         <div class="flex flex-col gap-2">
@@ -76,14 +42,15 @@
       >
         <i class="pi pi-arrow-left text-xl leading-none"></i>
       </button>
-      <NuxtLink to="/services/complaint/verification" class="w-full">
-        <Button
-          label="Selanjutnya"
-          class="w-full text-white font-semibold rounded-full shadow-lg transition-colors"
-          rounded
-          size="large"
-        />
-      </NuxtLink>
+      <Button
+        label="Submit"
+        class="w-full text-white font-semibold rounded-full shadow-lg transition-colors"
+        rounded
+        size="large"
+        :loading="loading"
+        :disabled="loading"
+        @click="handleSubmit"
+      />
     </div>
   </div>
 
@@ -143,13 +110,13 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
+import { ref,  watch } from "vue";
 import { useToast } from "primevue/usetoast";
 
 const router = useRouter();
 const toast = useToast();
-const { formData } = useAduanForm();
-const { getKecamatan, getDesa } = useAduan();
+const { formData, resetForm } = useAduanForm();
+const { createAduan } = useAduan();
 
 // Location state
 const showMapDialog = ref(false);
@@ -158,107 +125,8 @@ const mapLng = ref(formData.value.longitude || 106.6438673);
 const selectedLocation = ref(null);
 const tempLocation = ref(null);
 const reverseGeocodingLoading = ref(false);
-
-// Form state
-const kecamatanList = ref([
-  { id: 1, name: "Kecamatan A" },
-  { id: 2, name: "Kecamatan B" },
-  { id: 3, name: "Kecamatan C" },
-]);
-const kelurahanList = ref([
-  { id: 1, kecamatanId: 1, name: "Kelurahan A1" },
-  { id: 2, kecamatanId: 1, name: "Kelurahan A2" },
-  { id: 3, kecamatanId: 2, name: "Kelurahan B1" },
-  { id: 4, kecamatanId: 2, name: "Kelurahan B2" },
-  { id: 5, kecamatanId: 3, name: "Kelurahan C1" },
-]);
-
-const selectedKecamatan = ref(null);
-const selectedKelurahan = ref(null);
 const deskripsiLokasi = ref(formData.value.deskripsi_lokasi || "");
-const loadingKecamatan = ref(false);
-const loadingKelurahan = ref(false);
-
-// Fetch kecamatan dari API
-const fetchKecamatan = async () => {
-  loadingKecamatan.value = true;
-  try {
-    const response = await getKecamatan();
-    if (response.success && response.data) {
-      // Transform data dari API format {value, label} ke format yang digunakan di UI
-      kecamatanList.value = response.data.map((item) => ({
-        id: item.value,
-        name: item.label,
-      }));
-
-      // Set selected kecamatan jika sudah ada di formData
-      if (formData.value.kecamatan_id) {
-        selectedKecamatan.value =
-          kecamatanList.value.find(
-            (k) => k.id === formData.value.kecamatan_id
-          ) || null;
-        if (selectedKecamatan.value) {
-          await fetchDesa(selectedKecamatan.value.id);
-        }
-      }
-    }
-  } catch (error) {
-    const err = error || {};
-    const errorMessage =
-      (err.response && err.response.message) ||
-      err.message ||
-      "Gagal memuat kecamatan";
-    toast.add({
-      severity: "error",
-      summary: "Error",
-      detail: errorMessage,
-      life: 3000,
-    });
-  } finally {
-    loadingKecamatan.value = false;
-  }
-};
-
-// Fetch desa dari API
-const fetchDesa = async (kecamatanId) => {
-  if (!kecamatanId) return;
-
-  loadingKelurahan.value = true;
-  kelurahanList.value = [];
-  selectedKelurahan.value = null;
-
-  try {
-    const response = await getDesa(kecamatanId);
-    if (response.success && response.data) {
-      // Transform data dari API format {value, label} ke format yang digunakan di UI
-      kelurahanList.value = response.data.map((item) => ({
-        id: item.value,
-        name: item.label,
-      }));
-
-      // Set selected kelurahan jika sudah ada di formData
-      if (formData.value.desa_id) {
-        selectedKelurahan.value =
-          kelurahanList.value.find((k) => k.id === formData.value.desa_id) ||
-          null;
-      }
-    }
-  } catch (error) {
-    const err = error || {};
-    const errorMessage =
-      (err.response && err.response.message) ||
-      err.message ||
-      "Gagal memuat desa/kelurahan";
-    toast.add({
-      severity: "error",
-      summary: "Error",
-      detail: errorMessage,
-      life: 3000,
-    });
-  } finally {
-    loadingKelurahan.value = false;
-  }
-};
+const loading = ref(false);
 
 // Reverse geocoding function
 const reverseGeocode = async (lat, lng) => {
@@ -306,7 +174,6 @@ const reverseGeocode = async (lat, lng) => {
       };
     }
   } catch (error) {
-    console.error("Reverse geocode error:", error);
     // Fallback jika reverse geocoding gagal
     const namaLokasi = `Lokasi Aduan (${lat.toFixed(6)}, ${lng.toFixed(6)})`;
     formData.value.nama_lokasi = namaLokasi;
@@ -323,27 +190,6 @@ const reverseGeocode = async (lat, lng) => {
     reverseGeocodingLoading.value = false;
   }
 };
-
-// Watch dan simpan ke formData
-watch(selectedKecamatan, async (newVal) => {
-  if (newVal) {
-    formData.value.kecamatan_id = newVal.id;
-    await fetchDesa(newVal.id);
-  } else {
-    kelurahanList.value = [];
-    selectedKelurahan.value = null;
-    formData.value.kecamatan_id = null;
-    formData.value.desa_id = null;
-  }
-});
-
-watch(selectedKelurahan, (newVal) => {
-  if (newVal) {
-    formData.value.desa_id = newVal.id;
-  } else {
-    formData.value.desa_id = null;
-  }
-});
 
 watch(deskripsiLokasi, (newVal) => {
   formData.value.deskripsi_lokasi = newVal;
@@ -362,11 +208,6 @@ watch(
     }
   }
 );
-
-const onKecamatanChange = () => {
-  selectedKelurahan.value = null;
-  formData.value.desa_id = null;
-};
 
 const onLocationSelected = async (location) => {
   mapLat.value = location.lat;
@@ -412,9 +253,92 @@ const goBack = () => {
   router.back();
 };
 
-onMounted(() => {
-  fetchKecamatan();
-});
+const handleSubmit = async () => {
+  if (!formData.value.kategori_aduan_id) {
+    toast.add({
+      severity: "warn",
+      summary: "Peringatan",
+      detail: "Mohon pilih kategori aduan",
+      life: 3000,
+    });
+    return
+  }
+
+  if (!formData.value.judul || !formData.value.detail_aduan) {
+    toast.add({
+      severity: "warn",
+      summary: "Peringatan",
+      detail: "Mohon lengkapi judul dan deskripsi aduan",
+      life: 3000,
+    });
+    return
+  }
+
+  if (!formData.value.latitude || !formData.value.longitude) {
+    toast.add({
+      severity: "warn",
+      summary: "Peringatan",
+      detail: "Mohon pilih titik lokasi",
+      life: 3000,
+    });
+    return
+  }
+
+  if (!formData.value.deskripsi_lokasi) {
+    toast.add({
+      severity: "warn",
+      summary: "Peringatan",
+      detail: "Mohon isi deskripsi lokasi",
+      life: 3000,
+    });
+    return
+  }
+
+  loading.value = true
+
+  try {
+    const response = await createAduan({
+      kategori_aduan_id: formData.value.kategori_aduan_id,
+      judul: formData.value.judul,
+      detail_aduan: formData.value.detail_aduan,
+      latitude: formData.value.latitude,
+      longitude: formData.value.longitude,
+      nama_lokasi: formData.value.nama_lokasi,
+      deskripsi_lokasi: formData.value.deskripsi_lokasi,
+      jenis_aduan: formData.value.jenis_aduan || 'publik',
+      alasan_melaporkan: formData.value.alasan_melaporkan || '',
+      files: formData.value.files || []
+    })
+
+    if (response.success) {
+      toast.add({
+        severity: "success",
+        summary: "Berhasil",
+        detail: response.message || "Aduan berhasil dikirim",
+        life: 3000,
+      });
+      
+      resetForm()
+      
+      setTimeout(() => {
+        router.push('/services/complaint/masyarakat')
+      }, 1500)
+    }
+  } catch (error) {
+    const err = error || {}
+    const errorMessage = (err.response && err.response.message) || err.message || 'Terjadi kesalahan saat mengirim aduan'
+    const errors = (err.response && err.response.errors) || null
+
+    toast.add({
+      severity: "error",
+      summary: "Gagal",
+      detail: errors ? Object.values(errors).flat().join(', ') : errorMessage,
+      life: 5000,
+    });
+  } finally {
+    loading.value = false
+  }
+}
 
 definePageMeta({
   layout: "complaint-layout",

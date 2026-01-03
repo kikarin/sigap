@@ -134,7 +134,6 @@
                     class="w-full"
                     placeholder="Nama Lokasi"
                   />
-                  <p v-if="!isEditMode" class="text-sm text-gray-600">{{ aduan.kecamatan_nama }}, {{ aduan.desa_nama }}</p>
                 </div>
               </div>
               <div v-if="aduan.deskripsi_lokasi || isEditMode" class="flex items-start gap-2">
@@ -495,8 +494,6 @@ const enableEditMode = async () => {
     latitude: aduan.value.latitude ? parseFloat(aduan.value.latitude) : null,
     longitude: aduan.value.longitude ? parseFloat(aduan.value.longitude) : null,
     nama_lokasi: aduan.value.nama_lokasi,
-    kecamatan_id: aduan.value.kecamatan_id,
-    desa_id: aduan.value.desa_id,
     deskripsi_lokasi: aduan.value.deskripsi_lokasi,
     jenis_aduan: aduan.value.jenis_aduan,
     files: [],
@@ -619,8 +616,6 @@ const saveEdit = async () => {
       latitude: editData.value.latitude,
       longitude: editData.value.longitude,
       nama_lokasi: editData.value.nama_lokasi,
-      kecamatan_id: editData.value.kecamatan_id,
-      desa_id: editData.value.desa_id,
       deskripsi_lokasi: editData.value.deskripsi_lokasi,
       jenis_aduan: editData.value.jenis_aduan,
       alasan_melaporkan: editData.value.alasan_melaporkan || '',

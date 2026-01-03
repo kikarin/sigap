@@ -21,7 +21,6 @@ export const useApi = () => {
     const token = import.meta.client ? (typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null) : null
     
     const defaultHeaders: HeadersInit = {
-      'Content-Type': 'application/json',
       'Accept': 'application/json',
     }
     
@@ -29,12 +28,14 @@ export const useApi = () => {
       defaultHeaders['Authorization'] = `Bearer ${token}`
     }
     
+    const mergedHeaders: HeadersInit = { ...defaultHeaders }
+    if (options.headers) {
+      Object.assign(mergedHeaders, options.headers)
+    }
+    
     const response = await fetch(url, {
       ...options,
-      headers: {
-        ...defaultHeaders,
-        ...options.headers,
-      },
+      headers: mergedHeaders,
     })
     
     const data = await response.json().catch(() => ({ message: 'An error occurred' }))
@@ -55,10 +56,24 @@ export const useApi = () => {
   }
   
   const post = <T = any>(endpoint: string, data?: any, options?: RequestInit): Promise<T> => {
+    const isFormData = data instanceof FormData
+    
+    const customHeaders: HeadersInit = {}
+    if (options?.headers) {
+      Object.assign(customHeaders, options.headers)
+    }
+    
+    const headers: HeadersInit = {}
+    if (!isFormData) {
+      headers['Content-Type'] = 'application/json'
+    }
+    Object.assign(headers, customHeaders)
+    
     return apiFetch<T>(endpoint, {
       ...options,
       method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
+      body: data ? (isFormData ? data : JSON.stringify(data)) : undefined,
+      headers
     })
   }
   
