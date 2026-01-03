@@ -7,7 +7,7 @@
             <NuxtLink to="/services" class="">
               <i class="pi pi-arrow-left"></i>
             </NuxtLink>
-            <p class="font-semibold text-sm">Buat Aduan</p>
+            <p class="font-semibold text-sm">Buat</p>
           </div>
           <div class="mt-8 h-full flex-1">
             <slot />

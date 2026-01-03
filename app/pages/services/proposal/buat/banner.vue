@@ -1,13 +1,19 @@
 <template>
   <div class="p-4 flex flex-col h-full">
     <div class="flex-1">
-      <DynamicHeader title="Tumbnail Foto/Banner" />
-      <div>
-        <div class="flex flex-col gap-1">
+      <div class="flex items-center gap-3 mb-6">
+        <h1 class="font-semibold text-xl text-gray-800">Thumbnail/Foto Banner</h1>
+      </div>
+
+      <div class="space-y-5">
+        <div class="flex flex-col gap-2">
           <div class="mb-2">
-            <label class="block font-medium text-gray-700 text-base mb-1">
-              File Pendukung <span class="text-red-500">*</span>
+            <label class="block font-medium text-gray-700 text-sm mb-1">
+              Upload Thumbnail/Foto Banner <span class="text-red-500">*</span>
             </label>
+            <Message size="small" severity="secondary" variant="simple">
+              Format: JPG, PNG, GIF (Maks. 5MB)
+            </Message>
           </div>
 
           <!-- Upload Area -->
@@ -17,95 +23,55 @@
             @dragleave.prevent="isDragging = false"
             @drop.prevent="handleDrop"
             :class="[
-              'border-2 border-dashed rounded-xl   p-8 text-center cursor-pointer transition-colors',
+              'border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors',
               isDragging
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-300  hover:bg-gray-100',
+                ? 'border-primary-500 bg-primary-50'
+                : 'border-gray-300 hover:bg-gray-50',
             ]"
           >
-            <div class="flex justify-center gap-3 items-center">
-              <!-- Icon -->
-              <i class="pi pi-file" style="font-size: 1.5rem"></i>
-
-              <p class="text-sm text-gray-600 mb-1">
-                Pilih file pdf, docx, xlsx
+            <div v-if="!previewImage" class="flex flex-col justify-center gap-3 items-center">
+              <i class="pi pi-image text-4xl text-gray-400"></i>
+              <p class="text-sm text-gray-600">
+                Klik atau seret gambar ke sini untuk upload
               </p>
+              <p class="text-xs text-gray-500">
+                Format: JPG, PNG, GIF (Maks. 5MB)
+              </p>
+            </div>
+            <div v-else class="relative">
+              <img
+                :src="previewImage"
+                alt="Preview"
+                class="w-full h-64 object-cover rounded-lg"
+              />
+              <button
+                @click.stop="removeImage"
+                class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors"
+              >
+                <i class="pi pi-times"></i>
+              </button>
             </div>
 
             <input
               ref="fileInput"
               type="file"
-              accept=".pdf,.doc,.docx,.xlsx,.xls"
-              multiple
+              accept="image/*"
               @change="handleFileSelect"
               class="hidden"
             />
           </div>
 
-          <!-- File List -->
-          <div v-if="files.length > 0" class="mt-4 space-y-2">
-            <div
-              v-for="(file, index) in files"
-              :key="index"
-              class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg"
-            >
-              <div class="flex items-center flex-1 min-w-0">
-                <!-- File Icon -->
-                <div
-                  class="flex-shrink-0 w-10 h-10 bg-gray-100 rounded flex items-center justify-center mr-3"
-                >
-                  <svg
-                    class="w-6 h-6 text-gray-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                </div>
-
-                <!-- File Info -->
-                <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium text-gray-900 truncate">
-                    {{ file.name }}
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    {{ formatFileSize(file.size) }}
-                  </p>
-                </div>
-              </div>
-
-              <!-- Remove Button -->
-              <button
-                @click="removeFile(index)"
-                class="ml-3 flex-shrink-0 text-red-500 hover:text-red-700 transition-colors"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
+          <div v-if="selectedFile" class="text-xs text-gray-500">
+            {{ selectedFile.name }} ({{ formatFileSize(selectedFile.size) }})
           </div>
         </div>
       </div>
     </div>
+
     <button
-      class="rounded-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 w-full mt-4 transition-colors"
+      @click="handleNext"
+      :disabled="!selectedFile"
+      class="w-full rounded-full text-white font-bold bg-primary-500 p-3 mt-5 hover:bg-primary-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
     >
       Selanjutnya
     </button>
@@ -114,9 +80,15 @@
 
 <script setup>
 import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useProposalForm } from '@/composables/useProposalForm'
+
+const router = useRouter()
+const { formData } = useProposalForm()
 
 const fileInput = ref(null);
-const files = ref([]);
+const selectedFile = ref(null);
+const previewImage = ref(null);
 const isDragging = ref(false);
 
 const triggerFileInput = () => {
@@ -124,29 +96,53 @@ const triggerFileInput = () => {
 };
 
 const handleFileSelect = (event) => {
-  const selectedFiles = Array.from(event.target.files || []);
-  addFiles(selectedFiles);
+  const file = event.target.files?.[0];
+  if (file) {
+    if (file.size > 5 * 1024 * 1024) {
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      return;
+    }
+
+    selectedFile.value = file;
+    formData.value.thumbnail_foto_banner = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewImage.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
   event.target.value = "";
 };
 
 const handleDrop = (event) => {
   isDragging.value = false;
-  const droppedFiles = Array.from(event.dataTransfer.files || []);
-  addFiles(droppedFiles);
+  const file = event.dataTransfer.files?.[0];
+  if (file) {
+    if (file.size > 5 * 1024 * 1024) {
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      return;
+    }
+
+    selectedFile.value = file;
+    formData.value.thumbnail_foto_banner = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewImage.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
 };
 
-const addFiles = (newFiles) => {
-  const validFiles = newFiles.filter((file) => {
-    const validTypes = [".pdf", ".doc", ".docx", ".xlsx", ".xls"];
-    const fileExtension = "." + file.name.split(".").pop().toLowerCase();
-    return validTypes.includes(fileExtension);
-  });
-
-  files.value = [...files.value, ...validFiles];
-};
-
-const removeFile = (index) => {
-  files.value.splice(index, 1);
+const removeImage = () => {
+  selectedFile.value = null;
+  previewImage.value = null;
+  formData.value.thumbnail_foto_banner = null;
 };
 
 const formatFileSize = (bytes) => {
@@ -156,4 +152,20 @@ const formatFileSize = (bytes) => {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
 };
+
+const goBack = () => {
+  router.back()
+}
+
+const handleNext = () => {
+  if (!selectedFile.value) {
+    return
+  }
+
+  router.push('/services/proposal/buat/verifikasi')
+}
+
+definePageMeta({
+  layout: "complaint-layout",
+});
 </script>
