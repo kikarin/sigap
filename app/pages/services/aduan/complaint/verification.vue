@@ -52,7 +52,7 @@
       >
         <i class="pi pi-arrow-left text-xl leading-none"></i>
       </button>
-      <NuxtLink to="/services/complaint/type-complaint" class="w-full">
+      <NuxtLink to="/services/aduan/complaint/type-complaint" class="w-full">
         <Button
           label="Selanjutnya"
           class="w-full text-white font-semibold rounded-full shadow-lg transition-colors"

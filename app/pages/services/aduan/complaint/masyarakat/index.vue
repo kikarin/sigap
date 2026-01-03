@@ -123,7 +123,7 @@
         class="shadow-lg"
         rounded
         size="large"
-        @click="router.push('/services/complaint/category')"
+        @click="router.push('/services/aduan/complaint/category')"
       />
     </div>
   </div>

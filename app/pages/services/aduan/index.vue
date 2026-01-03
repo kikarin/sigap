@@ -27,11 +27,11 @@
     </div>
 
     <!-- White Cards Section -->
-    <div class="bg-white rounded-t-4xl z-10 flex-1 px-5 pt-16 pb-6 ">
+    <div class="bg-white rounded-t-4xl   flex-1 px-5 pt-16 pb-6 ">
       <div class="flex flex-col gap-4">
         <!-- Card 1: Aduan Mayarakat -->
         <NuxtLink
-          to="/services/complaint/masyarakat"
+          to="/services/aduan/complaint/masyarakat"
           class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer active:scale-[0.98]"
         >
           <div class="w-14 h-14 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
