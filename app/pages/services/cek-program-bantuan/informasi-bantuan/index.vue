@@ -5,11 +5,24 @@
       <div v-for="value in bantuanList" :key="value.title">
         <Card class="border border-gray-300">
           <template #header>
-            <div class="p-2 flex justify-between">
-              <p>
-                {{ value.name }}
-              </p>
-              <p class="text-sm" :class="value.status === 'PROSES' ? 'text-yellow-400' :  'text-red-400'">
+            <div class="px-3 py-2 flex items-center justify-between">
+              <div>
+                <p class="font-bold">
+                  {{ value.name }}
+                </p>
+                <div class="flex gap-2 text-sm text-gray-400">
+                  <p>{{ value.period }}</p>
+                  <p>{{value.year}}</p>
+                </div>
+              </div>
+              <p
+                class="text-sm px-3 py-1 rounded-xl"
+                :class="
+                  value.status === 'PROSES'
+                    ? 'text-yellow-500 bg-yellow-200'
+                    : 'text-rose-500 bg-rose-200'
+                "
+              >
                 {{ value.status }}
               </p>
             </div>
@@ -17,15 +30,9 @@
           <template #content>
             <div class="flex w-full justify-between text-sm items-center">
               <div>
-                <p class="font-bold">{{ value.target }}</p>
-                <p class="text-xs">{{ value.status }}</p>
+                <p class="font-bold ">{{ value.target }}</p>
+                <p class="text-gray-400">{{ value.description }}</p>
               </div>
-              <p
-                class="underline hover:cursor-pointer font-semibold text-black"
-                @click="router.push(value.link)"
-              >
-                Ubah
-              </p>
             </div>
           </template>
         </Card>
