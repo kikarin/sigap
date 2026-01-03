@@ -25,7 +25,7 @@
       </ClientOnly>
     </div>
 
-    <div class="px-4 py-3 border-t border-gray-200 bg-white flex-shrink-0">
+    <div class="px-4 py-3 border-t border-gray-200 bg-white shrink-0">
       <div class="flex gap-2">
         <button
           v-for="filter in filters"
@@ -41,7 +41,7 @@
       </div>
     </div>
 
-    <div class="h-64 overflow-y-auto bg-white border-t border-gray-200 flex-shrink-0">
+    <div class="h-64 overflow-y-auto bg-white border-t border-gray-200 shrink-0">
       <div class="px-4 py-3">
         <div
           v-for="location in filteredLocations"
@@ -313,9 +313,7 @@ const goBack = () => {
   router.back()
 }
 
-definePageMeta({
-  layout: 'default'
-})
+
 </script>
 
 <style>
