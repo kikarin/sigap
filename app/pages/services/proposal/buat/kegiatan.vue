@@ -132,12 +132,14 @@
                   </p>
                 </div>
               </div>
-              <button
+              <Button
+                icon="pi pi-times"
+                severity="danger"
+                text
+                rounded
                 @click="removeFile(index)"
-                class="ml-3 flex-shrink-0 text-red-500 hover:text-red-700 transition-colors"
-              >
-                <i class="pi pi-times"></i>
-              </button>
+                class="ml-3 flex-shrink-0"
+              />
             </div>
           </div>
         </div>
@@ -145,12 +147,12 @@
     </div>
 
     <div class="fixed bottom-0 left-0 right-0 bg-white px-4 py-4 border-t border-gray-200 shadow-lg z-50 max-w-md mx-auto">
-      <button
+      <Button
+        label="Selanjutnya"
         @click="handleNext"
-        class="w-full rounded-full text-white font-bold bg-primary-500 p-3 hover:bg-primary-600 transition-colors"
-      >
-        Selanjutnya
-      </button>
+        class="w-full"
+        rounded
+      />
     </div>
   </div>
 </template>

@@ -4,12 +4,13 @@
       <div class="px-5 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <button
+            <Button
+              icon="pi pi-arrow-left"
+              text
+              rounded
               @click="goBack"
-              class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors -ml-2"
-            >
-              <i class="pi pi-arrow-left text-gray-700 text-xl"></i>
-            </button>
+              class="-ml-2"
+            />
             <h1 class="font-semibold text-xl text-gray-800">Detail Surat</h1>
           </div>
           <div v-if="!isEditMode && surat?.status === 'disetujui'" class="flex items-center gap-2">
@@ -115,13 +116,15 @@
           <div>
             <div class="flex items-center justify-between mb-4">
               <h3 class="font-semibold text-base text-gray-800">Data Formulir</h3>
-              <button
+              <Button
                 v-if="!isEditMode && surat.can_be_edited"
+                icon="pi pi-pencil"
+                text
+                rounded
+                severity="secondary"
                 @click="enableEditMode"
-                class="text-primary-500 hover:text-primary-600 transition-colors"
-              >
-                <i class="pi pi-pencil text-sm"></i>
-              </button>
+                size="small"
+              />
             </div>
             <div class="space-y-4">
               <div
@@ -189,13 +192,15 @@
                           loading="lazy"
                         />
                       </div>
-                      <button
+                      <Button
                         v-if="isEditMode"
+                        icon="pi pi-times"
+                        severity="danger"
+                        rounded
                         @click="removeExistingFile(atribut.atribut_jenis_surat_id, file.path)"
-                        class="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg"
-                      >
-                        <i class="pi pi-times text-sm"></i>
-                      </button>
+                        class="absolute top-2 right-2"
+                        size="small"
+                      />
                     </div>
                     <div
                       v-for="(file, index) in getNewFiles(atribut.atribut_jenis_surat_id)"
@@ -208,13 +213,15 @@
                         :alt="file.name || 'Preview'"
                         class="w-full h-full object-cover"
                       />
-                      <button
+                      <Button
                         v-if="isEditMode"
+                        icon="pi pi-times"
+                        severity="danger"
+                        rounded
                         @click="removeNewFile(atribut.atribut_jenis_surat_id, index)"
-                        class="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg"
-                      >
-                        <i class="pi pi-times text-sm"></i>
-                      </button>
+                        class="absolute top-2 right-2"
+                        size="small"
+                      />
                     </div>
                   </div>
                 </div>

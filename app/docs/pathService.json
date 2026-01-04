@@ -29,6 +29,6 @@
     "description": "Bayar pajak kendaraan Anda secara mudah, cepat dan dari aplikasi",
     "image": "/hold-rupiah-coin.png",
     "bgColor": "bg-blue-100",
-    "path": "/services/cek-program-bantuan"
+    "path": "/services/program-bantuan"
   }
 ]

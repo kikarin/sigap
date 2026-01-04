@@ -36,12 +36,13 @@
               alt="Preview"
               class="w-full h-48 object-cover rounded-xl"
             />
-            <button
+            <Button
+              icon="pi pi-times"
+              severity="danger"
+              rounded
               @click="removeBanner"
-              class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors"
-            >
-              <i class="pi pi-times"></i>
-            </button>
+              class="absolute top-2 right-2"
+            />
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">

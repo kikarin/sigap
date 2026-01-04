@@ -47,12 +47,14 @@
       </div>
     </div>
     <div class="flex items-center mb-5 gap-3">
-      <button
+      <Button
+        icon="pi pi-arrow-left"
+        severity="secondary"
+        outlined
+        rounded
         @click="goBack"
-        class="inline-flex p-4 hover:cursor-pointer shrink-0 rounded-full border items-center justify-center border-gray-300 shadow-xl"
-      >
-        <i class="pi pi-arrow-left text-xl leading-none"></i>
-      </button>
+        class="shrink-0"
+      />
       <Button
         label="Submit"
         class="w-full text-white font-semibold rounded-full shadow-lg transition-colors"

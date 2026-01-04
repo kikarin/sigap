@@ -2,12 +2,12 @@
   <div class="h-[calc(100vh-80px)] flex flex-col bg-white">
     <div class="px-4 py-4 border-b border-gray-200">
       <div class="flex items-center gap-3">
-        <button
+        <Button
+          icon="pi pi-arrow-left"
+          text
+          rounded
           @click="goBack"
-          class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
-        >
-          <i class="pi pi-arrow-left text-gray-800 text-xl"></i>
-        </button>
+        />
         <h1 class="font-semibold text-lg text-gray-800">Lokasi Layanan Darurat</h1>
       </div>
     </div>
@@ -25,23 +25,23 @@
       </ClientOnly>
     </div>
 
-    <div class="px-4 py-3 border-t border-gray-200 bg-white shrink-0">
+    <div class="px-4 py-3 border-t border-gray-200 bg-white flex-shrink-0">
       <div class="flex gap-2">
-        <button
+        <Button
           v-for="filter in filters"
           :key="filter.id"
+          :label="filter.label"
           @click="selectedFilter = filter.id"
-          class="flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all"
-          :class="selectedFilter === filter.id
-            ? 'bg-primary-500 text-white'
-            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
-        >
-          {{ filter.label }}
-        </button>
+          :severity="selectedFilter === filter.id ? undefined : 'secondary'"
+          :outlined="selectedFilter !== filter.id"
+          class="flex-1"
+          rounded
+          size="small"
+        />
       </div>
     </div>
 
-    <div class="h-64 overflow-y-auto bg-white border-t border-gray-200 shrink-0">
+    <div class="h-64 overflow-y-auto bg-white border-t border-gray-200 flex-shrink-0">
       <div class="px-4 py-3">
         <div
           v-for="location in filteredLocations"
@@ -80,6 +80,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useToast } from 'primevue/usetoast'
+import { Button } from 'primevue'
 import L from 'leaflet'
 
 const router = useRouter()
@@ -313,7 +314,9 @@ const goBack = () => {
   router.back()
 }
 
-
+definePageMeta({
+  layout: 'default'
+})
 </script>
 
 <style>

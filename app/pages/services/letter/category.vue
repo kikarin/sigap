@@ -35,12 +35,14 @@
       </div>
     </div>
     <div class="flex items-center mb-5 gap-3">
-      <button
+      <Button
+        icon="pi pi-arrow-left"
+        severity="secondary"
+        outlined
+        rounded
         @click="goBack"
-        class="inline-flex p-4 hover:cursor-pointer shrink-0 rounded-full border items-center justify-center border-gray-300 shadow-xl hover:bg-gray-50 transition-colors"
-      >
-        <i class="pi pi-arrow-left text-xl leading-none"></i>
-      </button>
+        class="shrink-0"
+      />
       <NuxtLink :to="selectedCategory ? `/services/letter/form?jenis=${selectedCategory}` : '#'" class="w-full">
         <Button
           label="Selanjutnya"

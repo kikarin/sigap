@@ -4,12 +4,13 @@
       <div class="px-5 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <button
+            <Button
+              icon="pi pi-arrow-left"
+              text
+              rounded
               @click="goBack"
-              class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors -ml-2"
-            >
-              <i class="pi pi-arrow-left text-gray-700 text-xl"></i>
-            </button>
+              class="-ml-2"
+            />
             <h1 class="font-semibold text-xl text-gray-800">Detail Aduan</h1>
           </div>
           <div class="flex items-center gap-2">
@@ -43,13 +44,14 @@
         <div class="flex-1 min-w-0">
           <div v-if="!isEditMode" class="flex items-start gap-2">
             <h2 class="font-bold text-xl text-gray-800 mb-2 flex-1">{{ aduan.judul }}</h2>
-            <button
+            <Button
               v-if="!isEditMode"
+              icon="pi pi-pencil"
+              text
+              rounded
+              severity="secondary"
               @click="enableEditMode"
-              class="text-primary-500 hover:text-primary-600 transition-colors"
-            >
-              <i class="pi pi-pencil text-lg"></i>
-            </button>
+            />
           </div>
           <div v-else class="flex items-start gap-2">
             <InputText
@@ -89,13 +91,15 @@
           <div>
             <div class="flex items-center justify-between mb-2">
               <h3 class="font-semibold text-base text-gray-800">Deskripsi Aduan</h3>
-              <button
+              <Button
                 v-if="!isEditMode"
+                icon="pi pi-pencil"
+                text
+                rounded
+                severity="secondary"
                 @click="enableEditMode"
-                class="text-primary-500 hover:text-primary-600 transition-colors"
-              >
-                <i class="pi pi-pencil text-sm"></i>
-              </button>
+                size="small"
+              />
             </div>
             <p v-if="!isEditMode" class="text-gray-700 leading-relaxed">{{ aduan.detail_aduan }}</p>
             <Textarea
@@ -115,13 +119,15 @@
           <div class="space-y-4">
             <div class="flex items-center justify-between mb-3">
               <h3 class="font-semibold text-base text-gray-800">Lokasi</h3>
-              <button
+              <Button
                 v-if="!isEditMode"
+                icon="pi pi-pencil"
+                text
+                rounded
+                severity="secondary"
                 @click="enableEditMode"
-                class="text-primary-500 hover:text-primary-600 transition-colors"
-              >
-                <i class="pi pi-pencil text-sm"></i>
-              </button>
+                size="small"
+              />
             </div>
             <div class="space-y-3">
               <div class="flex items-start gap-2">
@@ -199,13 +205,15 @@
           <div>
             <div class="flex items-center justify-between mb-3">
               <h3 class="font-semibold text-base text-gray-800">Bukti Laporan</h3>
-              <button
+              <Button
                 v-if="!isEditMode"
+                icon="pi pi-pencil"
+                text
+                rounded
+                severity="secondary"
                 @click="enableEditMode"
-                class="text-primary-500 hover:text-primary-600 transition-colors"
-              >
-                <i class="pi pi-pencil text-sm"></i>
-              </button>
+                size="small"
+              />
             </div>
             
             <!-- Existing Files -->
@@ -226,13 +234,15 @@
                     loading="lazy"
                   />
                 </div>
-                <button
+                <Button
                   v-if="isEditMode"
+                  icon="pi pi-times"
+                  severity="danger"
+                  rounded
                   @click="removeExistingFile(file.id)"
-                  class="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg"
-                >
-                  <i class="pi pi-times text-sm"></i>
-                </button>
+                  class="absolute top-2 right-2"
+                  size="small"
+                />
               </div>
             </div>
             
@@ -249,12 +259,14 @@
                   :alt="file.name || 'Preview'"
                   class="w-full h-full object-cover"
                 />
-                <button
+                <Button
+                  icon="pi pi-times"
+                  severity="danger"
+                  rounded
                   @click="removeNewFile(index)"
-                  class="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg"
-                >
-                  <i class="pi pi-times text-sm"></i>
-                </button>
+                  class="absolute top-2 right-2"
+                  size="small"
+                />
               </div>
             </div>
             
@@ -288,13 +300,15 @@
           <div>
             <div class="flex items-center justify-between mb-2">
               <h3 class="font-semibold text-base text-gray-800">Alasan Melaporkan</h3>
-              <button
+              <Button
                 v-if="!isEditMode"
+                icon="pi pi-pencil"
+                text
+                rounded
+                severity="secondary"
                 @click="enableEditMode"
-                class="text-primary-500 hover:text-primary-600 transition-colors"
-              >
-                <i class="pi pi-pencil text-sm"></i>
-              </button>
+                size="small"
+              />
             </div>
             <p v-if="!isEditMode" class="text-gray-700">{{ aduan.alasan_melaporkan }}</p>
             <Textarea

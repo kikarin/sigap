@@ -61,7 +61,11 @@
         </div>
       </div>
     </div>
-    <button class="bg-primary-500 text-white font-bold m-5 p-3 rounded-full">Simpan</button>
+    <Button
+      label="Simpan"
+      class="m-5"
+      rounded
+    />
   </div>
 </template>
 

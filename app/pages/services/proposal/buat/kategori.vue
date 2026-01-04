@@ -35,24 +35,21 @@
       </div>
     </div>
     <div class="flex items-center mb-5 gap-3">
-      <button
+      <Button
+        icon="pi pi-arrow-left"
+        severity="secondary"
+        outlined
+        rounded
         @click="goBack"
-        class="inline-flex p-4 hover:cursor-pointer shrink-0 rounded-full border items-center justify-center border-gray-300 shadow-xl hover:bg-gray-50 transition-colors"
-      >
-        <i class="pi pi-arrow-left text-xl leading-none"></i>
-      </button>
-      <button
+        class="shrink-0"
+      />
+      <Button
+        label="Selanjutnya"
         @click="handleNext"
         :disabled="!selectedCategory"
-        class="w-full rounded-full text-white font-semibold py-4 shadow-lg transition-colors"
-        :class="
-          selectedCategory
-            ? 'bg-primary-500 hover:bg-primary-600'
-            : 'bg-gray-300 cursor-not-allowed'
-        "
-      >
-        Selanjutnya
-      </button>
+        class="w-full"
+        rounded
+      />
     </div>
   </div>
 </template>

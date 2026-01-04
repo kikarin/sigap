@@ -34,24 +34,27 @@
             <div class="flex items-center gap-2">
               <i class="pi pi-image text-primary-500"></i>
               <span class="text-xs text-gray-700 truncate flex-1">{{ file.name }}</span>
-              <button
+              <Button
+                icon="pi pi-times"
+                severity="danger"
+                text
+                rounded
                 @click="removeFile(index)"
-                class="text-red-500 hover:text-red-700"
-              >
-                <i class="pi pi-times"></i>
-              </button>
+              />
             </div>
           </div>
         </div>
       </div>
     </div>
     <div class="flex items-center gap-3">
-      <button
+      <Button
+        icon="pi pi-arrow-left"
+        severity="secondary"
+        outlined
+        rounded
         @click="goBack"
-        class="inline-flex p-4 hover:cursor-pointer shrink-0 rounded-full border items-center justify-center border-gray-300"
-      >
-        <i class="pi pi-arrow-left text-xl leading-none"></i>
-      </button>
+        class="shrink-0"
+      />
       <NuxtLink to="/services/aduan/complaint/type-complaint" class="w-full">
         <Button
           label="Selanjutnya"

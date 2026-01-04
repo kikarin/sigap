@@ -1,6 +1,6 @@
 <template>
-  <div class="p-4 flex flex-col h-full">
-    <div class="flex-1">
+  <div class="flex flex-col h-full">
+    <div class="flex-1 overflow-y-auto px-4 pb-32">
       <div class="flex items-center gap-3 mb-6">
         <h1 class="font-semibold text-xl text-gray-800">Thumbnail/Foto Banner</h1>
       </div>
@@ -44,12 +44,13 @@
                 alt="Preview"
                 class="w-full h-64 object-cover rounded-lg"
               />
-              <button
+              <Button
+                icon="pi pi-times"
+                severity="danger"
+                rounded
                 @click.stop="removeImage"
-                class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors"
-              >
-                <i class="pi pi-times"></i>
-              </button>
+                class="absolute top-2 right-2"
+              />
             </div>
 
             <input
@@ -68,13 +69,15 @@
       </div>
     </div>
 
-    <button
-      @click="handleNext"
-      :disabled="!selectedFile"
-      class="w-full rounded-full text-white font-bold bg-primary-500 p-3 mt-5 hover:bg-primary-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-    >
-      Selanjutnya
-    </button>
+    <div class="fixed bottom-0 left-0 right-0 bg-white px-4 py-4 border-t border-gray-200 shadow-lg z-50 max-w-md mx-auto">
+      <Button
+        label="Selanjutnya"
+        @click="handleNext"
+        :disabled="!selectedFile"
+        class="w-full"
+        rounded
+      />
+    </div>
   </div>
 </template>
 

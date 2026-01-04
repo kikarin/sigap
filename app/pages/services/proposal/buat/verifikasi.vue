@@ -40,13 +40,14 @@
           </div>
 
           <div class="flex items-center justify-between">
-            <button
+            <Button
+              label="Hapus Tanda Tangan"
+              icon="pi pi-trash"
+              severity="danger"
+              text
               @click="clearCanvas"
-              class="text-sm text-red-500 hover:text-red-700 font-medium flex items-center gap-2"
-            >
-              <i class="pi pi-trash"></i>
-              Hapus Tanda Tangan
-            </button>
+              class="text-sm"
+            />
           </div>
 
           <div v-if="signatureDataUrl" class="mt-4 p-3 bg-gray-50 rounded-lg">
@@ -69,14 +70,14 @@
     </div>
 
     <div class="fixed bottom-0 left-0 right-0 bg-white px-4 py-4 border-t border-gray-200 shadow-lg z-50 max-w-md mx-auto">
-      <button
+      <Button
+        :label="loading ? 'Mengirim...' : 'Kirim Proposal'"
         @click="handleSubmit"
         :disabled="!hasSignature || loading"
-        class="w-full rounded-full text-white font-bold bg-primary-500 p-3 hover:bg-primary-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-      >
-        <span v-if="loading">Mengirim...</span>
-        <span v-else>Kirim Proposal</span>
-      </button>
+        :loading="loading"
+        class="w-full"
+        rounded
+      />
     </div>
   </div>
 </template>

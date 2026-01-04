@@ -118,12 +118,13 @@
               >
                 <i class="pi pi-file text-gray-500"></i>
                 <span class="text-sm text-gray-700 flex-1">{{ getFileName(file) }}</span>
-                <button
+                <Button
+                  icon="pi pi-times"
+                  severity="danger"
+                  text
+                  rounded
                   @click="removeFile(field.id, index)"
-                  class="text-red-500 hover:text-red-700"
-                >
-                  <i class="pi pi-times"></i>
-                </button>
+                />
               </div>
             </div>
           </div>
@@ -134,13 +135,15 @@
     <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-20">
       <div class="max-w-md mx-auto px-4 py-4 w-full">
         <div class="flex items-center gap-3">
-          <button
+          <Button
             v-if="currentStep > 0"
+            icon="pi pi-arrow-left"
+            severity="secondary"
+            outlined
+            rounded
             @click="previousStep"
-            class="inline-flex p-4 hover:cursor-pointer shrink-0 rounded-full border items-center justify-center border-gray-300 shadow-xl hover:bg-gray-50 transition-colors"
-          >
-            <i class="pi pi-arrow-left text-xl leading-none"></i>
-          </button>
+            class="shrink-0"
+          />
           <Button
             v-if="currentStep < totalSteps - 1"
             label="Selanjutnya"

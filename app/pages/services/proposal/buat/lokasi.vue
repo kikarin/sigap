@@ -1,6 +1,6 @@
 <template>
-  <div class="p-4 flex flex-col h-full">
-    <div class="flex-1">
+  <div class="flex flex-col h-full">
+    <div class="flex-1 overflow-y-auto px-4 pb-32">
       <div class="flex items-center gap-3 mb-6">
         <h1 class="font-semibold text-xl text-gray-800">Lokasi Kegiatan</h1>
       </div>
@@ -66,12 +66,14 @@
       </div>
     </div>
 
-    <button
-      @click="handleNext"
-      class="w-full rounded-full text-white font-bold bg-primary-500 p-3 mt-5 hover:bg-primary-600 transition-colors"
-    >
-      Selanjutnya
-    </button>
+    <div class="fixed bottom-0 left-0 right-0 bg-white px-4 py-4 border-t border-gray-200 shadow-lg z-50 max-w-md mx-auto">
+      <Button
+        label="Selanjutnya"
+        @click="handleNext"
+        class="w-full"
+        rounded
+      />
+    </div>
 
     <Dialog
       v-model:visible="showMapDialog"

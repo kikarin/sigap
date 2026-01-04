@@ -3,12 +3,13 @@
     <div class="bg-white sticky top-0 z-10 border-b border-gray-200">
       <div class="px-5 py-4">
         <div class="flex items-center gap-3">
-          <button
+          <Button
+            icon="pi pi-arrow-left"
+            text
+            rounded
             @click="goBack"
-            class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors -ml-2"
-          >
-            <i class="pi pi-arrow-left text-gray-700 text-xl"></i>
-          </button>
+            class="-ml-2"
+          />
           <h1 class="font-semibold text-xl text-gray-800">Layanan Surat</h1>
         </div>
       </div>
