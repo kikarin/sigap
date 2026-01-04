@@ -27,7 +27,7 @@
 <script setup lang="ts">
 const nav = [
   { name: "Beranda", icon: "pi-home", link: "/" },
-  { name: "Riwayat", icon: "pi-history", link: "/history" },
+  { name: "Berita", icon: "pi-list", link: "/berita" },
   { name: "DARURAT", type: "danger", link: "/emergency" },
   { name: "Layanan", icon: "pi-star", link: "/services" },
   { name: "Profile", icon: "pi-user", link: "/profile" },

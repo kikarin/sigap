@@ -1,9 +1,10 @@
 import tailwindcss from "@tailwindcss/vite";
 import { definePreset } from "@primeuix/themes";
 import Aura from "@primeuix/themes/aura";
+import Lara from "@primeuix/themes/lara";
 import { fileURLToPath } from "node:url";
 
-const MyCustomTheme = definePreset(Aura, {
+const MyCustomTheme = definePreset(Lara, {
   semantic: {
     primary: {
       50: "#eef2ff",

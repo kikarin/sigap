@@ -14,6 +14,12 @@
   --color-primary-800: #1e3a8a;
   --color-primary-900: #172554;
   --color-primary-950: #0f172a;
+  
+  --font-family-sans: 'Roboto', ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+* {
+  font-family: 'Roboto', ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Mobile Toast Styling */
