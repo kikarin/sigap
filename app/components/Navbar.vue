@@ -17,8 +17,8 @@
         :to="value.link"
         class="flex flex-col items-center gap-1"
       >
-        <i :class="['pi text-gray-500 text-xl', value.icon]"></i>
-        <p class="text-sm text-gray-700">{{ value.name }}</p>
+        <i :class="['pi text-xl duration-300 ease-in-out', value.icon, isActive(value.link) ? 'text-blue-500' : 'text-gray-500']"></i>
+        <p class="text-sm duration-300 ease-in-out " :class="isActive(value.link) ? 'text-blue-500' : 'text-gray-500'">{{ value.name }}</p>
       </NuxtLink>
     </div>
   </div>
@@ -32,4 +32,8 @@ const nav = [
   { name: "Layanan", icon: "pi-star", link: "/services" },
   { name: "Profile", icon: "pi-user", link: "/profile" },
 ];
+const route = useRoute();
+const isActive = (link: string) => {
+  return route.path === link;
+};
 </script>
