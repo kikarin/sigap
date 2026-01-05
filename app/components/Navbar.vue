@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white z-100 sticky bottom-0 flex px-4 border border-gray-200 py-3 justify-around items-end shadow-lg">
+  <div class="bg-white z-100 sticky bottom-0 flex px-4 py-3 justify-around items-end shadow-lg">
     <div
       v-for="value in nav"
       :key="value.name"

@@ -21,7 +21,7 @@
         class="w-full object-cover h-full"
       />
       <div
-        class="absolute inset-0 bg-gradient-to-t from-gray-100 via-gray-100/20 to-transparent"
+        class="absolute -inset-0 bg-gradient-to-t from-gray-100 via-gray-100/20 to-transparent"
       ></div>
     </div>
     <PopularService />

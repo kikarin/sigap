@@ -1,10 +1,10 @@
 <template>
-  <div class="flex flex-col gap-3">
+  <div class="flex flex-col gap-2">
     <NuxtLink
       v-for="service in filteredServices"
       :key="service.id"
       :to="service.path"
-      class="bg-white rounded-xl p-4 shadow-sm border border-gray-300 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer active:scale-[0.98]"
+      class="bg-white rounded-xl p-2 shadow-sm border border-gray-300 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer active:scale-[0.98]"
     >
       <div
         class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden"
