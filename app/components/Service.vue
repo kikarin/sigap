@@ -4,10 +4,10 @@
       v-for="service in filteredServices"
       :key="service.id"
       :to="service.path"
-      class="bg-white rounded-xl p-2 shadow-sm border border-gray-300 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer active:scale-[0.98]"
+      class="bg-white rounded-xl px-4 py-2 shadow-sm border  border-gray-300 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer active:scale-[0.98]"
     >
       <div
-        class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden"
+        class="w-14 h-14 rounded-xl flex items-center justify-center shrink-0 overflow-hidden"
       >
         <NuxtImg
           :src="service.image"
@@ -16,14 +16,14 @@
         />
       </div>
       <div class="flex-1 min-w-0">
-        <h3 class="font-bold text-base text-gray-800 mb-1.5">
+        <h3 class="font-bold text-base text-gray-800 ">
           {{ service.title }}
         </h3>
-        <p class="text-sm text-gray-500 leading-relaxed">
+        <p class="text-sm text-gray-500 leading-tight">
           {{ service.description }}
         </p>
       </div>
-      <i class="pi pi-angle-right text-primary-500 text-xl flex-shrink-0"></i>
+      <i class="pi pi-arrow-right text-primary-500 text-xl shrink-0"></i>
     </NuxtLink>
   </div>
 </template>

@@ -13,7 +13,7 @@
         <p class="text-[10px] font-bold">{{ value.name }}</p>
       </NuxtLink>
       <NuxtLink
-        v-else
+        v-else 
         :to="value.link"
         class="flex flex-col items-center gap-1"
       >
@@ -28,7 +28,7 @@
 const nav = [
   { name: "Beranda", icon: "pi-home", link: "/" },
   { name: "Berita", icon: "pi-list", link: "/berita" },
-  { name: "DARURAT", type: "danger", link: "/emergency" },
+  { name: "DARURAT", type: "danger", link: "/services/emergency-location" },
   { name: "Layanan", icon: "pi-star", link: "/services" },
   { name: "Profile", icon: "pi-user", link: "/profile" },
 ];
