@@ -119,7 +119,7 @@ const menuItems = [
     id: 'berita',
     label: 'Berita & Pengumuman',
     description: 'Lihat berita dan pengumuman terbaru',
-    icon: 'pi pi-newspaper',
+    icon: 'pi pi-list',
     bgColor: 'bg-blue-100',
     iconColor: 'text-blue-600',
     route: '/berita'
@@ -184,28 +184,13 @@ const handleMenuClick = (menu: any) => {
 
   switch (menu.id) {
     case 'kebijakan-privasi':
-      toast.add({
-        severity: 'info',
-        summary: 'Kebijakan Privasi',
-        detail: 'Halaman kebijakan privasi akan segera tersedia',
-        life: 3000
-      })
+      router.push('/profile/kebijakan-privasi')
       break
     case 'syarat-ketentuan':
-      toast.add({
-        severity: 'info',
-        summary: 'Syarat & Ketentuan',
-        detail: 'Halaman syarat & ketentuan akan segera tersedia',
-        life: 3000
-      })
+      router.push('/profile/syarat-ketentuan')
       break
     case 'tentang':
-      toast.add({
-        severity: 'info',
-        summary: 'Tentang Aplikasi',
-        detail: 'SIGAP - Sistem Informasi Galuga Pintar\nAplikasi layanan publik untuk warga Kabupaten Bogor',
-        life: 4000
-      })
+      router.push('/profile/tentang-aplikasi')
       break
     case 'bantuan':
       toast.add({
