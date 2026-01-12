@@ -31,7 +31,7 @@ export default defineNuxtConfig({
     "leaflet/dist/leaflet.css",
   ],
 
-  modules: ["@primevue/nuxt-module", "@nuxt/image"],
+  modules: ["@primevue/nuxt-module", "@nuxt/image", "@vite-pwa/nuxt"],
 
   runtimeConfig: {
     // Private keys (only available on server-side)
@@ -59,4 +59,63 @@ export default defineNuxtConfig({
   vite: {
     plugins: [tailwindcss()],
   },
+
+  nitro: {
+    compressPublicAssets: true,
+    minify: true
+  },
+
+  pwa: {
+    registerType: 'prompt',
+    strategies: 'generateSW',
+    manifest: {
+      name: 'SIGAP - Sistem Informasi dan Layanan Publik',
+      short_name: 'SIGAP',
+      description: 'Sistem Informasi dan Layanan Publik Kabupaten Bogor',
+      theme_color: '#1053E1',
+      background_color: '#ffffff',
+      display: 'standalone',
+      orientation: 'portrait',
+      scope: '/',
+      start_url: '/',
+      icons: [
+        {
+          src: '/Lambang_Kabupaten_Bogor.png',
+          sizes: '192x192',
+          type: 'image/png',
+          purpose: 'any maskable'
+        },
+        {
+          src: '/Lambang_Kabupaten_Bogor.png',
+          sizes: '512x512',
+          type: 'image/png',
+          purpose: 'any maskable'
+        }
+      ]
+    },
+    workbox: {
+      navigateFallback: '/',
+      globPatterns: ['**/*.{js,css,html}'],
+      globIgnores: ['**/node_modules/**/*', '**/.nuxt/**/*', '**/.output/**/*'],
+      maximumFileSizeToCacheInBytes: 5000000,
+      runtimeCaching: [
+        {
+          urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'images-cache',
+            expiration: {
+              maxEntries: 50,
+              maxAgeSeconds: 60 * 60 * 24 * 30
+            }
+          }
+        }
+      ]
+    },
+    devOptions: {
+      enabled: true,
+      suppressWarnings: true,
+      type: 'module'
+    }
+  } as any,
 });

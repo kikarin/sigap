@@ -1,5 +1,6 @@
 <template>
   <div class="bg-gray-100 min-h-screen relative">
+    <PwaInstallDialog />
     <div class="relative h-96">
       <div class="flex z-30 p-4 justify-between absolute top-0 w-full items-center">
         <div class="flex items-center gap-2">
@@ -31,6 +32,7 @@
 <script setup lang="ts">
 const { isAuthenticated } = useAuth()
 const router = useRouter()
+const { triggerInstallPrompt, isStandalone } = usePwaInstall()
 
 const handleProfileClick = () => {
   if (isAuthenticated.value) {
@@ -39,4 +41,12 @@ const handleProfileClick = () => {
     router.push('/auth')
   }
 }
+
+onMounted(() => {
+  // Trigger install prompt saat pertama kali buka halaman
+  // Hanya jika belum di-install (bukan standalone mode)
+  if (!isStandalone.value) {
+    triggerInstallPrompt()
+  }
+})
 </script>
