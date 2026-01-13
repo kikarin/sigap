@@ -1,8 +1,8 @@
 export const usePwaInstall = () => {
-  const isIOS = ref(false)
-  const isStandalone = ref(false)
-  const showInstallPrompt = ref(false)
-  const deferredPrompt = ref<any>(null)
+  const isIOS = useState<boolean>('pwa-is-ios', () => false)
+  const isStandalone = useState<boolean>('pwa-is-standalone', () => false)
+  const showInstallPrompt = useState<boolean>('pwa-show-install-prompt', () => false)
+  const deferredPrompt = useState<any>('pwa-deferred-prompt', () => null)
 
   const checkIOS = () => {
     if (typeof window === 'undefined') return
@@ -17,6 +17,11 @@ export const usePwaInstall = () => {
     isStandalone.value = isInStandaloneMode || window.matchMedia('(display-mode: standalone)').matches
   }
 
+  // Initialize on client side - use onMounted to ensure it runs only on client
+  if (process.client && typeof window !== 'undefined') {
+    checkIOS()
+  }
+
   const checkAndroidInstallPrompt = () => {
     if (typeof window === 'undefined') return
     if (isStandalone.value) return
@@ -25,9 +30,9 @@ export const usePwaInstall = () => {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault()
       deferredPrompt.value = e
-      // Show prompt after a short delay
+      // Show prompt after a short delay if not already shown
       setTimeout(() => {
-        if (!isStandalone.value && shouldShowPrompt()) {
+        if (!isStandalone.value && shouldShowPrompt() && !showInstallPrompt.value) {
           showInstallPrompt.value = true
         }
       }, 1500)
@@ -43,7 +48,7 @@ export const usePwaInstall = () => {
     // Show install prompt for iOS after a delay
     if (isIOS.value) {
       setTimeout(() => {
-        if (!isStandalone.value) {
+        if (!isStandalone.value && shouldShowPrompt()) {
           showInstallPrompt.value = true
         }
       }, 3000) // Show after 3 seconds
@@ -108,38 +113,51 @@ export const usePwaInstall = () => {
     
     // Check if already installed
     checkIOS()
-    if (isStandalone.value) return
-    if (!shouldShowPrompt()) return
+    
+    console.log('PWA Install Check:', {
+      isStandalone: isStandalone.value,
+      isIOS: isIOS.value,
+      shouldShow: shouldShowPrompt(),
+      dismissed: localStorage.getItem('pwa-install-dismissed')
+    })
+    
+    if (isStandalone.value) {
+      console.log('PWA already installed, skipping prompt')
+      return
+    }
+    
+    if (!shouldShowPrompt()) {
+      console.log('PWA prompt dismissed recently, skipping')
+      return
+    }
     
     // For Android, setup listener for beforeinstallprompt event
     checkAndroidInstallPrompt()
     
-    // For iOS or fallback, show after delay
-    setTimeout(() => {
+    // For iOS, show instructions after delay
+    if (isIOS.value) {
+      console.log('iOS detected, showing install instructions')
+      checkIOSInstallPrompt()
+      return
+    }
+    
+    // For Android, show immediately
+    // This ensures dialog appears even if event doesn't fire
+    console.log('Android detected, showing install prompt')
+    
+    // Set directly to true - force show dialog
+    console.log('Force setting showInstallPrompt to true')
+    showInstallPrompt.value = true
+    console.log('showInstallPrompt value after set:', showInstallPrompt.value)
+    
+    // Also try with nextTick to ensure reactivity
+    nextTick(() => {
       if (!isStandalone.value && shouldShowPrompt()) {
-        // For iOS, always show instructions
-        // For Android, show if we have deferred prompt or after timeout
-        if (isIOS.value) {
-          showInstallPrompt.value = true
-        } else if (deferredPrompt.value) {
-          // Android with prompt available
-          showInstallPrompt.value = true
-        } else {
-          // Android fallback - show anyway after delay
-          setTimeout(() => {
-            if (!isStandalone.value && shouldShowPrompt()) {
-              showInstallPrompt.value = true
-            }
-          }, 1000)
-        }
+        showInstallPrompt.value = true
+        console.log('showInstallPrompt set to true in nextTick:', showInstallPrompt.value)
       }
-    }, 2000) // Show after 2 seconds
+    })
   }
-
-  onMounted(() => {
-    if (typeof window === 'undefined') return
-    checkIOS()
-  })
 
   return {
     isIOS,

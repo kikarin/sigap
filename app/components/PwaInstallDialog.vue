@@ -1,16 +1,17 @@
 <template>
-  <Dialog
-    v-model:visible="visible"
-    modal
-    :closable="true"
-    :draggable="false"
-    :style="{ width: '90%', maxWidth: '400px' }"
-    :pt="{
-      root: { class: 'rounded-xl' },
-      header: { class: 'pb-2' },
-      content: { class: 'pt-0' }
-    }"
-  >
+  <ClientOnly>
+    <Dialog
+      v-model:visible="dialogVisible"
+      modal
+      :closable="true"
+      :draggable="false"
+      :style="{ width: '90%', maxWidth: '400px' }"
+      :pt="{
+        root: { class: 'rounded-xl' },
+        header: { class: 'pb-2' },
+        content: { class: 'pt-0' }
+      }"
+    >
     <template #header>
       <div class="flex items-center gap-3">
         <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
@@ -104,19 +105,37 @@
       </div>
     </template>
   </Dialog>
+  </ClientOnly>
 </template>
 
 <script setup lang="ts">
 const { isIOS, showInstallPrompt, installPWA, dismissPrompt } = usePwaInstall()
 
-const visible = computed({
-  get: () => showInstallPrompt.value,
-  set: (value) => {
+// Create local reactive ref that syncs with showInstallPrompt
+const dialogVisible = computed({
+  get: () => {
+    const value = showInstallPrompt.value
+    console.log('Dialog visible getter called:', value)
+    return value
+  },
+  set: (value: boolean) => {
+    console.log('Dialog visible setter called:', value)
     if (!value) {
       dismissPrompt()
     }
   }
 })
+
+// Watch for changes to showInstallPrompt
+watch(showInstallPrompt, (newVal, oldVal) => {
+  console.log('showInstallPrompt changed from', oldVal, 'to', newVal)
+  console.log('dialogVisible computed value:', dialogVisible.value)
+}, { immediate: true, deep: true })
+
+// Also watch dialogVisible to see if it updates
+watch(dialogVisible, (newVal) => {
+  console.log('dialogVisible changed to:', newVal)
+}, { immediate: true })
 
 const handleInstall = async () => {
   await installPWA()
