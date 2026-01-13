@@ -6,7 +6,7 @@
     >
       <div class="flex flex-col items-center space-y-4">
         <NuxtImg
-          src="/Lambang_Kabupaten_Bogor.png"
+          src="/sigap.icon.png"
           alt="Logo"
           class="w-24 h-24 object-contain animate-pulse"
         />

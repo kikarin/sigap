@@ -4,7 +4,7 @@
     <div class="relative h-96">
       <div class="flex z-30 p-4 justify-between absolute top-0 w-full items-center">
         <div class="flex items-center gap-2">
-          <NuxtImg src="/Lambang_Kabupaten_Bogor.png" alt="Sigap Logo" class="w-8 h-9" />
+          <NuxtImg src="/sigap.icon.png" alt="Sigap Logo" class="w-8 h-9" />
           <h1 class="text-white font-bold text-lg">SIGAP</h1>
         </div>
         <Button
@@ -17,7 +17,7 @@
         />
       </div>
       <NuxtImg
-        src="/bg.jpg"
+        src="/bg-sawah.jpg"
         alt="Sigap Logo"
         class="w-full object-cover h-full"
       />
