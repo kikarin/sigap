@@ -68,7 +68,9 @@ export default defineNuxtConfig({
   pwa: {
     registerType: 'prompt',
     strategies: 'generateSW',
+    includeAssets: ['Lambang_Kabupaten_Bogor.png'],
     manifest: {
+      id: '/',
       name: 'SIGAP - Sistem Informasi dan Layanan Publik',
       short_name: 'SIGAP',
       description: 'Sistem Informasi dan Layanan Publik Kabupaten Bogor',
@@ -78,15 +80,52 @@ export default defineNuxtConfig({
       orientation: 'portrait',
       scope: '/',
       start_url: '/',
+      categories: ['government', 'public-services', 'utilities'],
       icons: [
         {
-          src: '/Lambang_Kabupaten_Bogor.png',
+          src: '/sigap.icon.png',
+          sizes: '72x72',
+          type: 'image/png',
+          purpose: 'any'
+        },
+        {
+          src: '/sigap.icon.png',
+          sizes: '96x96',
+          type: 'image/png',
+          purpose: 'any'
+        },
+        {
+          src: '/sigap.icon.png',
+          sizes: '128x128',
+          type: 'image/png',
+          purpose: 'any'
+        },
+        {
+          src: '/sigap.icon.png',
+          sizes: '144x144',
+          type: 'image/png',
+          purpose: 'any'
+        },
+        {
+          src: '/sigap.icon.png',
+          sizes: '152x152',
+          type: 'image/png',
+          purpose: 'any'
+        },
+        {
+          src: '/sigap.icon.png',
           sizes: '192x192',
           type: 'image/png',
           purpose: 'any maskable'
         },
         {
-          src: '/Lambang_Kabupaten_Bogor.png',
+          src: '/sigap.icon.png',
+          sizes: '384x384',
+          type: 'image/png',
+          purpose: 'any'
+        },
+        {
+          src: '/sigap.icon.png',
           sizes: '512x512',
           type: 'image/png',
           purpose: 'any maskable'
@@ -115,7 +154,13 @@ export default defineNuxtConfig({
     devOptions: {
       enabled: true,
       suppressWarnings: true,
-      type: 'module'
+      type: 'module',
+      navigateFallback: '/'
+    },
+    filename: 'sw.js',
+    manifestFilename: 'manifest.webmanifest',
+    injectManifest: {
+      globPatterns: ['**/*.{js,css,html,png,svg,jpg,jpeg}']
     }
   } as any,
 });

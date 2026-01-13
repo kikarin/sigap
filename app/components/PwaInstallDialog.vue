@@ -25,10 +25,10 @@
     </template>
 
     <div class="flex flex-col gap-4">
-      <!-- Android Install -->
-      <div v-if="!isIOS" class="space-y-3">
+      <!-- Desktop Install -->
+      <div v-if="isDesktop" class="space-y-3">
         <p class="text-gray-700 leading-relaxed">
-          Pasang aplikasi SIGAP untuk akses yang lebih cepat dan pengalaman yang lebih baik.
+          Install aplikasi SIGAP di komputer Anda untuk pengalaman seperti aplikasi desktop native.
         </p>
         <div class="bg-primary-50 border border-primary-200 rounded-lg p-3">
           <div class="flex items-start gap-2">
@@ -36,11 +36,64 @@
             <div class="text-sm text-gray-700">
               <p class="font-semibold mb-1">Keuntungan:</p>
               <ul class="list-disc list-inside space-y-1 text-gray-600">
+                <li>Aplikasi terpisah dari browser</li>
+                <li>Bekerja offline</li>
+                <li>Notifikasi desktop</li>
+                <li>Icon di taskbar/dock</li>
+                <li>Pengalaman seperti aplikasi desktop</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <!-- Manual Install Instructions for Desktop -->
+        <div v-if="!hasDeferredPrompt" class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-3">
+          <div class="flex items-start gap-2">
+            <i class="pi pi-info-circle text-yellow-600 mt-0.5"></i>
+            <div class="text-sm text-gray-700">
+              <p class="font-semibold mb-1">Cara Install Manual:</p>
+              <ol class="list-decimal list-inside space-y-1 text-gray-600">
+                <li>Klik ikon <strong>+</strong> atau <strong>Install</strong> di address bar browser</li>
+                <li>Atau klik menu <strong>⋮</strong> (tiga titik) → <strong>"Install SIGAP"</strong></li>
+                <li>Klik <strong>"Install"</strong> pada dialog yang muncul</li>
+                <li>Aplikasi akan terinstall dan muncul di desktop/taskbar</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Android Install -->
+      <div v-else-if="!isIOS" class="space-y-3">
+        <p class="text-gray-700 leading-relaxed">
+          Install aplikasi SIGAP di perangkat Android Anda sebagai aplikasi penuh, bukan hanya shortcut.
+        </p>
+        <div class="bg-primary-50 border border-primary-200 rounded-lg p-3">
+          <div class="flex items-start gap-2">
+            <i class="pi pi-check-circle text-primary-600 mt-0.5"></i>
+            <div class="text-sm text-gray-700">
+              <p class="font-semibold mb-1">Keuntungan:</p>
+              <ul class="list-disc list-inside space-y-1 text-gray-600">
+                <li>Aplikasi terpisah dari browser</li>
                 <li>Akses lebih cepat</li>
                 <li>Bekerja offline</li>
-                <li>Notifikasi langsung</li>
-                <li>Pengalaman seperti aplikasi native</li>
+                <li>Notifikasi push</li>
+                <li>Muncul di launcher seperti aplikasi biasa</li>
               </ul>
+            </div>
+          </div>
+        </div>
+        <!-- Manual Install Instructions for Android -->
+        <div v-if="!hasDeferredPrompt" class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-3">
+          <div class="flex items-start gap-2">
+            <i class="pi pi-info-circle text-yellow-600 mt-0.5"></i>
+            <div class="text-sm text-gray-700">
+              <p class="font-semibold mb-1">Cara Install Manual:</p>
+              <ol class="list-decimal list-inside space-y-1 text-gray-600">
+                <li>Klik menu <strong>⋮</strong> (tiga titik) di pojok kanan atas browser</li>
+                <li>Pilih <strong>"Install app"</strong> atau <strong>"Add to Home screen"</strong></li>
+                <li>Klik <strong>"Install"</strong> pada dialog yang muncul</li>
+                <li>Aplikasi akan terinstall dan muncul di launcher</li>
+              </ol>
             </div>
           </div>
         </div>
@@ -91,10 +144,17 @@
           @click="handleDismiss"
         />
         <Button
-          v-if="!isIOS"
-          label="Install Sekarang"
+          v-if="!isIOS && hasDeferredPrompt"
+          label="Install Aplikasi"
           icon="pi pi-download"
+          :loading="isInstalling"
           @click="handleInstall"
+        />
+        <Button
+          v-else-if="!isIOS && !hasDeferredPrompt"
+          label="Mengerti"
+          icon="pi pi-check"
+          @click="handleDismiss"
         />
         <Button
           v-else
@@ -109,36 +169,38 @@
 </template>
 
 <script setup lang="ts">
-const { isIOS, showInstallPrompt, installPWA, dismissPrompt } = usePwaInstall()
+const pwaInstall = usePwaInstall()
+const { isIOS, showInstallPrompt, installPWA, dismissPrompt } = pwaInstall
+const isDesktop = (pwaInstall as any).isDesktop as Ref<boolean>
+const deferredPrompt = (pwaInstall as any).deferredPrompt as Ref<any>
+
+const isInstalling = ref(false)
+const hasDeferredPrompt = computed(() => !!deferredPrompt.value)
 
 // Create local reactive ref that syncs with showInstallPrompt
 const dialogVisible = computed({
-  get: () => {
-    const value = showInstallPrompt.value
-    console.log('Dialog visible getter called:', value)
-    return value
-  },
+  get: () => showInstallPrompt.value,
   set: (value: boolean) => {
-    console.log('Dialog visible setter called:', value)
     if (!value) {
       dismissPrompt()
     }
   }
 })
 
-// Watch for changes to showInstallPrompt
-watch(showInstallPrompt, (newVal, oldVal) => {
-  console.log('showInstallPrompt changed from', oldVal, 'to', newVal)
-  console.log('dialogVisible computed value:', dialogVisible.value)
-}, { immediate: true, deep: true })
-
-// Also watch dialogVisible to see if it updates
-watch(dialogVisible, (newVal) => {
-  console.log('dialogVisible changed to:', newVal)
-}, { immediate: true })
-
 const handleInstall = async () => {
-  await installPWA()
+  if (!deferredPrompt.value) {
+    dismissPrompt()
+    return
+  }
+  
+  isInstalling.value = true
+  try {
+    await installPWA()
+  } catch (error) {
+    // Silent fail
+  } finally {
+    isInstalling.value = false
+  }
 }
 
 const handleDismiss = () => {

@@ -4,6 +4,8 @@ export const usePwaInstall = () => {
   const showInstallPrompt = useState<boolean>('pwa-show-install-prompt', () => false)
   const deferredPrompt = useState<any>('pwa-deferred-prompt', () => null)
 
+  const isDesktop = useState<boolean>('pwa-is-desktop', () => false)
+
   const checkIOS = () => {
     if (typeof window === 'undefined') return
     
@@ -13,89 +15,21 @@ export const usePwaInstall = () => {
     const isIOSDevice = isIPad || isIPhone
     const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator as any).standalone
     
-    isIOS.value = isIOSDevice
-    isStandalone.value = isInStandaloneMode || window.matchMedia('(display-mode: standalone)').matches
-  }
-
-  // Initialize on client side - use onMounted to ensure it runs only on client
-  if (process.client && typeof window !== 'undefined') {
-    checkIOS()
-  }
-
-  const checkAndroidInstallPrompt = () => {
-    if (typeof window === 'undefined') return
-    if (isStandalone.value) return
-
-    // Check if beforeinstallprompt event is available (Android Chrome)
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault()
-      deferredPrompt.value = e
-      // Show prompt after a short delay if not already shown
-      setTimeout(() => {
-        if (!isStandalone.value && shouldShowPrompt() && !showInstallPrompt.value) {
-          showInstallPrompt.value = true
-        }
-      }, 1500)
-    }
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener)
-  }
-
-  const checkIOSInstallPrompt = () => {
-    if (typeof window === 'undefined') return
-    if (isStandalone.value) return
-
-    // Show install prompt for iOS after a delay
-    if (isIOS.value) {
-      setTimeout(() => {
-        if (!isStandalone.value && shouldShowPrompt()) {
-          showInstallPrompt.value = true
-        }
-      }, 3000) // Show after 3 seconds
-    }
-  }
-
-  const installPWA = async () => {
-    if (typeof window === 'undefined') return false
+    const isDesktopDevice = !isIOSDevice && 
+      (userAgent.includes('windows') || 
+       userAgent.includes('macintosh') || 
+       userAgent.includes('linux') ||
+       userAgent.includes('x11'))
     
-    if (deferredPrompt.value) {
-      // Android Chrome
-      try {
-        deferredPrompt.value.prompt()
-        const { outcome } = await deferredPrompt.value.userChoice
-        
-        if (outcome === 'accepted') {
-          console.log('User accepted the install prompt')
-        }
-        
-        deferredPrompt.value = null
-        showInstallPrompt.value = false
-        return true
-      } catch (error) {
-        console.error('Error installing PWA:', error)
-        return false
-      }
-    } else if (isIOS.value) {
-      // iOS - show instructions (already shown in dialog)
-      return false
-    }
-    return false
-  }
-
-  const dismissPrompt = () => {
-    showInstallPrompt.value = false
-    deferredPrompt.value = null
-    // Store dismissal in localStorage to avoid showing again for a while
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('pwa-install-dismissed', Date.now().toString())
-    }
+    isIOS.value = isIOSDevice
+    isDesktop.value = isDesktopDevice
+    isStandalone.value = isInStandaloneMode || window.matchMedia('(display-mode: standalone)').matches
   }
 
   const shouldShowPrompt = () => {
     if (typeof window === 'undefined') return false
     if (isStandalone.value) return false
     
-    // Check if user dismissed recently (within 7 days)
     const dismissed = localStorage.getItem('pwa-install-dismissed')
     if (dismissed) {
       const dismissedTime = parseInt(dismissed)
@@ -108,61 +42,137 @@ export const usePwaInstall = () => {
     return true
   }
 
-  const triggerInstallPrompt = () => {
+  const checkAndroidInstallPrompt = () => {
     if (typeof window === 'undefined') return
-    
-    // Check if already installed
-    checkIOS()
-    
-    console.log('PWA Install Check:', {
-      isStandalone: isStandalone.value,
-      isIOS: isIOS.value,
-      shouldShow: shouldShowPrompt(),
-      dismissed: localStorage.getItem('pwa-install-dismissed')
-    })
-    
-    if (isStandalone.value) {
-      console.log('PWA already installed, skipping prompt')
-      return
+    if (isStandalone.value) return
+
+    if ((window as any).__deferredPrompt) {
+      deferredPrompt.value = (window as any).__deferredPrompt
+      if (!isStandalone.value && shouldShowPrompt() && !showInstallPrompt.value) {
+        showInstallPrompt.value = true
+      }
     }
-    
-    if (!shouldShowPrompt()) {
-      console.log('PWA prompt dismissed recently, skipping')
-      return
+
+    const handlePwaInstallAvailable = (e: CustomEvent) => {
+      deferredPrompt.value = e.detail
+      if (!isStandalone.value && shouldShowPrompt() && !showInstallPrompt.value) {
+        showInstallPrompt.value = true
+      }
     }
-    
-    // For Android, setup listener for beforeinstallprompt event
-    checkAndroidInstallPrompt()
-    
-    // For iOS, show instructions after delay
-    if (isIOS.value) {
-      console.log('iOS detected, showing install instructions')
-      checkIOSInstallPrompt()
-      return
-    }
-    
-    // For Android, show immediately
-    // This ensures dialog appears even if event doesn't fire
-    console.log('Android detected, showing install prompt')
-    
-    // Set directly to true - force show dialog
-    console.log('Force setting showInstallPrompt to true')
-    showInstallPrompt.value = true
-    console.log('showInstallPrompt value after set:', showInstallPrompt.value)
-    
-    // Also try with nextTick to ensure reactivity
-    nextTick(() => {
+
+    window.addEventListener('pwa-install-available', handlePwaInstallAvailable as EventListener)
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault()
+      deferredPrompt.value = e
+      ;(window as any).__deferredPrompt = e
+      
       if (!isStandalone.value && shouldShowPrompt()) {
         showInstallPrompt.value = true
-        console.log('showInstallPrompt set to true in nextTick:', showInstallPrompt.value)
+      }
+    }
+
+    window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener)
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener)
+  }
+
+  const checkIOSInstallPrompt = () => {
+    if (typeof window === 'undefined') return
+    if (isStandalone.value) return
+
+    if (isIOS.value) {
+      setTimeout(() => {
+        if (!isStandalone.value && shouldShowPrompt()) {
+          showInstallPrompt.value = true
+        }
+      }, 3000)
+    }
+  }
+
+  const installPWA = async () => {
+    if (typeof window === 'undefined') return false
+    
+    if (deferredPrompt.value) {
+      try {
+        await deferredPrompt.value.prompt()
+        const { outcome } = await deferredPrompt.value.userChoice
+        
+        if (outcome === 'accepted') {
+          showInstallPrompt.value = false
+        }
+        
+        deferredPrompt.value = null
+        return true
+      } catch (error) {
+        showInstallPrompt.value = false
+        return false
+      }
+    } else if (isIOS.value) {
+      showInstallPrompt.value = false
+      return false
+    } else {
+      showInstallPrompt.value = false
+      return false
+    }
+  }
+
+  const dismissPrompt = () => {
+    showInstallPrompt.value = false
+    deferredPrompt.value = null
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('pwa-install-dismissed', Date.now().toString())
+    }
+  }
+
+  if (process.client && typeof window !== 'undefined') {
+    checkIOS()
+    
+    nextTick(() => {
+      if (!isStandalone.value) {
+        checkAndroidInstallPrompt()
       }
     })
   }
 
+  const triggerInstallPrompt = () => {
+    if (typeof window === 'undefined') return
+    
+    checkIOS()
+    
+    if (isStandalone.value) {
+      return
+    }
+    
+    if (!shouldShowPrompt()) {
+      return
+    }
+    
+    checkAndroidInstallPrompt()
+    
+    if (isIOS.value) {
+      checkIOSInstallPrompt()
+      return
+    }
+    
+    if (deferredPrompt.value) {
+      showInstallPrompt.value = true
+    } else {
+      showInstallPrompt.value = true
+      
+      nextTick(() => {
+        if (!isStandalone.value && shouldShowPrompt()) {
+          showInstallPrompt.value = true
+        }
+      })
+    }
+  }
+
   return {
     isIOS,
+    isDesktop,
     isStandalone,
     showInstallPrompt,
+    deferredPrompt,
     installPWA,
     dismissPrompt,
     shouldShowPrompt,
