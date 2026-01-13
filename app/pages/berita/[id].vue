@@ -24,7 +24,8 @@
         <NuxtImg
           :src="berita.foto"
           :alt="berita.title"
-          class="w-full h-full object-cover"
+          class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+          @click="openImageModal"
         />
       </div>
 
@@ -71,13 +72,41 @@
       </div>
       <p class="text-gray-700 font-medium text-lg mb-8">Berita tidak ditemukan</p>
     </div>
+
+    <!-- Image Modal -->
+    <Dialog
+      v-model:visible="imageModalVisible"
+      :modal="true"
+      :closable="true"
+      :draggable="false"
+      :resizable="false"
+      :style="{ width: '90vw', maxWidth: '1200px' }"
+      :pt="{
+        root: { class: 'p-0' },
+        content: { class: 'p-0' }
+      }"
+      @hide="closeImageModal"
+    >
+      <template #header>
+        <div class="flex items-center w-full px-4 py-3 border-b border-gray-200">
+          <h3 class="font-semibold text-lg text-gray-800">{{ berita?.title }}</h3>
+        </div>
+      </template>
+      <div v-if="berita?.foto" class="flex items-center justify-center bg-gray-100 p-4">
+        <NuxtImg
+          :src="berita.foto"
+          :alt="berita.title"
+          class="max-w-full max-h-[80vh] object-contain"
+        />
+      </div>
+    </Dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useToast } from 'primevue/usetoast'
-import { Card, Button, Tag, ProgressSpinner } from 'primevue'
+import { Card, Button, Tag, ProgressSpinner, Dialog } from 'primevue'
 import { useBerita } from '@/composables/useBerita'
 
 const route = useRoute()
@@ -87,9 +116,20 @@ const { getDetailBerita } = useBerita()
 
 const berita = ref(null)
 const loading = ref(false)
+const imageModalVisible = ref(false)
 
 const goBack = () => {
   router.back()
+}
+
+const openImageModal = () => {
+  if (berita.value?.foto) {
+    imageModalVisible.value = true
+  }
+}
+
+const closeImageModal = () => {
+  imageModalVisible.value = false
 }
 
 const fetchDetail = async () => {
