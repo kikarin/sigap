@@ -3,7 +3,7 @@
     <!-- Background Image -->
     <div class="relative h-96 flex-shrink-0">
       <NuxtImg 
-        src="/bg.jpg" 
+        src="/bg-sawah.jpg" 
         alt="Background" 
         class="w-full object-cover h-full" 
       />
@@ -16,7 +16,7 @@
       <div class="mb-8 flex justify-center">
         <div class="flex flex-col items-center">
           <NuxtImg
-            src="/Lambang_Kabupaten_Bogor.png"
+            src="/sigap.icon.png"
             alt="Logo"
             class="w-16 h-16 object-contain mb-4"
           />

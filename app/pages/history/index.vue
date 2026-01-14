@@ -110,7 +110,7 @@ const selectedFilter = ref('all')
 const filterTabs = [
   { value: 'all', label: 'Semua' },
   { value: 'aduan', label: 'Aduan' },
-  { value: 'surat', label: 'Surat' },
+//  { value: 'surat', label: 'Surat' },
   { value: 'proposal', label: 'Proposal' },
   { value: 'bantuan', label: 'Bantuan' }
 ]
