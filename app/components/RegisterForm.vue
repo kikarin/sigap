@@ -2,14 +2,13 @@
   <div class="w-full">
     <!-- Header Section -->
     <div class="text-center mb-8">
-      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-green-600 mb-4 shadow-lg">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 mb-4 shadow-lg">
         <i class="pi pi-user-plus text-white text-2xl"></i>
       </div>
       <h1 class="font-bold text-3xl text-gray-800 mb-2">Buat Akun Baru</h1>
       <p class="text-sm text-gray-600">Daftar untuk mengakses layanan SIGAP</p>
     </div>
 
-    <!-- Form Section -->
     <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
       <div class="space-y-5">
         <!-- Nama Input -->
@@ -84,7 +83,6 @@
           <small v-if="errors.password" id="password-help" class="p-error text-xs">{{ errors.password }}</small>
         </div>
 
-        <!-- Confirm Password Input -->
         <div class="flex flex-col gap-2">
           <label for="confirmPassword" class="text-sm font-semibold text-gray-700 flex items-center gap-2">
             <i class="pi pi-lock text-blue-500"></i>
@@ -103,7 +101,6 @@
           <small v-if="errors.confirmPassword" id="confirmPassword-help" class="p-error text-xs">{{ errors.confirmPassword }}</small>
         </div>
 
-        <!-- Submit Button -->
         <Button
           label="Daftar"
           icon="pi pi-user-plus"

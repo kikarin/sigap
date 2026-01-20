@@ -39,38 +39,40 @@
 
     <template v-else>
       <div v-if="beritaList.length > 0" class="px-5 py-4 space-y-4">
-        <Card
+        <div
           v-for="berita in beritaList"
           :key="berita.id"
-          class="cursor-pointer hover:shadow-md transition-shadow border border-gray-200 overflow-hidden"
+          class="cursor-pointer rounded-3xl bg-[#F5F7FB] hover:bg-[#EEF1F8] transition-colors flex gap-4 p-4 shadow-sm"
           @click="viewDetail(berita.id)"
         >
-          <template #content>
-            <div class="space-y-3">
-              <div v-if="berita.foto" class="w-full h-48 -mx-4 -mt-4 mb-2">
-                <NuxtImg
-                  :src="berita.foto"
-                  :alt="berita.title"
-                  class="w-full h-full object-cover"
-                />
-              </div>
-              <div class="flex items-center gap-2">
-                <Tag
-                  :value="berita.tipe_label || formatTipe(berita.tipe)"
-                  :severity="getTipeSeverity(berita.tipe)"
-                  class="text-xs"
-                />
-                <span class="text-xs text-gray-400">{{ formatDate(berita.tanggal) }}</span>
-              </div>
-              <h3 class="font-bold text-base text-gray-800 line-clamp-2">
-                {{ berita.title }}
-              </h3>
-              <p class="text-sm text-gray-600 line-clamp-2">
-                {{ berita.deskripsi }}
-              </p>
+          <div class="w-[72px] h-[72px] rounded-2xl overflow-hidden flex-shrink-0 bg-gray-200">
+            <NuxtImg
+              v-if="berita.foto"
+              :src="berita.foto"
+              :alt="berita.title"
+              class="w-full h-full object-cover"
+            />
+          </div>
+
+          <div class="flex-1 min-w-0 flex flex-col justify-center">
+            <div class="flex items-center gap-2 mb-1">
+              <span
+                class="text-[10px] font-semibold uppercase tracking-wide px-2 py-1 rounded-full bg-blue-50 text-blue-600"
+              >
+                {{ berita.tipe_label || formatTipe(berita.tipe) }}
+              </span>
+              <span class="text-[10px] text-gray-400">• {{ formatDateShort(berita.tanggal) }}</span>
             </div>
-          </template>
-        </Card>
+
+            <h3 class="font-semibold text-[15px] text-gray-900 leading-snug line-clamp-2">
+              {{ berita.title }}
+            </h3>
+
+            <p class="text-[12px] text-gray-500 mt-1 line-clamp-2">
+              {{ stripHtml(berita.deskripsi) }}
+            </p>
+          </div>
+        </div>
 
         <div v-if="hasMore" class="flex justify-center py-4">
           <Button
@@ -194,12 +196,28 @@ const viewDetail = (id) => {
   router.push(`/berita/${id}`)
 }
 
+const stripHtml = (html) => {
+  if (!html) return ''
+  const div = document.createElement('div')
+  div.innerHTML = html
+  return div.textContent || div.innerText || ''
+}
+
 const formatTipe = (tipe) => {
   const tipeMap = {
     'berita': 'Berita',
     'event': 'Pengumuman'
   }
   return tipeMap[tipe] || tipe
+}
+
+const formatDateShort = (dateString) => {
+  if (!dateString) return '-'
+  const date = new Date(dateString)
+  return date.toLocaleDateString('id-ID', {
+    day: '2-digit',
+    month: 'short'
+  })
 }
 
 const getTipeSeverity = (tipe) => {

@@ -1,60 +1,68 @@
 <template>
-  <div class="min-h-screen bg-white pb-20">
-    <div class="bg-white sticky top-0 z-10 border-b border-gray-200">
-      <div class="px-5 py-4">
-        <div class="flex items-center gap-3">
-          <Button
-            icon="pi pi-arrow-left"
-            text
-            rounded
-            @click="goBack"
-            class="-ml-2"
-          />
-          <h1 class="font-semibold text-xl text-gray-800">Detail Berita</h1>
-        </div>
-      </div>
-    </div>
-
+  <div class="min-h-screen bg-white pb-6">
     <div v-if="loading" class="flex items-center justify-center min-h-[60vh]">
       <ProgressSpinner />
     </div>
 
-    <div v-else-if="berita" class="pb-4">
-      <div v-if="berita.foto" class="w-full h-64 mb-4">
+    <div v-else-if="berita" class="relative">
+      <div class="relative h-[260px] w-full overflow-hidden">
         <NuxtImg
+          v-if="berita.foto"
           :src="berita.foto"
           :alt="berita.title"
           class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
           @click="openImageModal"
         />
+        <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-white pointer-events-none"></div>
+
+        <button
+          class="absolute top-1 left-4 w-9 h-9 rounded-full bg-black/40 backdrop-blur flex items-center justify-center text-white"
+          @click="goBack"
+        >
+          <i class="pi pi-arrow-left text-sm"></i>
+        </button>
       </div>
 
-      <div class="px-5 space-y-4">
-        <div class="flex items-center gap-2">
-          <Tag
-            :value="berita.tipe_label || formatTipe(berita.tipe)"
-            :severity="getTipeSeverity(berita.tipe)"
-            class="text-sm"
-          />
-          <span class="text-sm text-gray-500">{{ formatDate(berita.tanggal) }}</span>
-        </div>
+      <div class="-mt-1 px-4">
+        <div class="bg-white rounded-3xl shadow-md p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <span
+              class="text-[11px] font-semibold uppercase tracking-wide py-1 rounded-full bg-blue-50 text-blue-600"
+            >
+              {{ berita.tipe_label || formatTipe(berita.tipe) }}
+            </span>
+          </div>
 
-        <h1 class="font-bold text-2xl text-gray-800">
-          {{ berita.title }}
-        </h1>
+          <h1 class="font-bold text-[20px] text-gray-900 leading-snug mb-3">
+            {{ berita.title }}
+          </h1>
 
-        <div class="prose max-w-none">
-          <p class="text-base text-gray-700 leading-relaxed whitespace-pre-line">
-            {{ berita.deskripsi }}
-          </p>
-        </div>
+          <div class="flex items-center flex-wrap gap-2 text-xs text-gray-500 mb-5">
+            <span>{{ formatDate(berita.tanggal || berita.created_at) }}</span>
+            <span v-if="berita.views">• {{ berita.views }} Views</span>
+          </div>
 
-        <div v-if="berita.created_at || berita.updated_at" class="pt-4 border-t border-gray-200">
-          <div class="text-xs text-gray-500 space-y-1">
-            <p v-if="berita.created_at">
+          <div class="border-t border-gray-100 pt-5">
+            <div
+              class="text-[15px] text-gray-800 leading-relaxed prose max-w-none
+                    prose-ul:list-disc
+                    prose-ol:list-decimal
+                    prose-ul:pl-6
+                    prose-ol:pl-6
+                    prose-li:list-item
+                    prose-ul:list-outside"
+              v-html="berita.deskripsi"
+            ></div>
+          </div>
+
+          <div v-if="berita.created_at || berita.updated_at" class="mt-6 pt-4 border-t border-gray-100">
+            <p v-if="berita.created_at" class="text-[11px] text-gray-400">
               Dibuat: {{ formatDateTime(berita.created_at) }}
             </p>
-            <p v-if="berita.updated_at && berita.updated_at !== berita.created_at">
+            <p
+              v-if="berita.updated_at && berita.updated_at !== berita.created_at"
+              class="text-[11px] text-gray-400 mt-1"
+            >
               Diperbarui: {{ formatDateTime(berita.updated_at) }}
             </p>
           </div>
@@ -203,4 +211,90 @@ onMounted(() => {
   fetchDetail()
 })
 </script>
+
+<style>
+/* Heading */
+.prose h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+}
+
+.prose h2 {
+  font-size: 1.875rem;
+  font-weight: 600;
+}
+
+.prose h3 {
+  font-size: 1.7rem;
+  font-weight: 600;
+}
+
+/* Paragraph */
+.prose p {
+  margin-bottom: 1em;
+}
+
+/* List (INI INTINYA) */
+.prose ul {
+  list-style-type: disc;
+  padding-left: 1.8em;
+  margin: 1em 0;
+}
+
+.prose ol {
+  list-style-type: decimal;
+  padding-left: 1.8em;
+  margin: 1em 0;
+}
+
+.prose li {
+  margin: 0.5em 0;
+}
+
+/* 🔥 CKEditor fix */
+.prose li > p {
+  display: inline;
+  margin: 0;
+}
+
+/* Blockquote */
+.prose blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1em;
+  margin: 1em 0;
+  font-style: italic;
+  color: #4b5563;
+}
+
+/* Media */
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1em 0;
+}
+
+/* Link */
+.prose a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+/* Table */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+.prose th,
+.prose td {
+  border: 1px solid #e5e7eb;
+  padding: 0.5em;
+}
+
+.prose th {
+  background-color: #f9fafb;
+}
+</style>
 
