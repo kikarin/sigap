@@ -1,7 +1,7 @@
 import { useApi } from './useApi'
 
 export const useProgramBantuan = () => {
-  const { get } = useApi()
+  const { get, post } = useApi()
 
   const getListRiwayatProgramBantuan = async (params?: {
     page?: number
@@ -34,9 +34,17 @@ export const useProgramBantuan = () => {
     return get(`/program-bantuan/riwayat-saya/${id}`)
   }
 
+  const absenMandiri = async (id: number, foto_bukti: File) => {
+    const formData = new FormData()
+    formData.append('foto_bukti', foto_bukti)
+
+    return post(`/program-bantuan/riwayat-saya/${id}/absen-mandiri`, formData)
+  }
+
   return {
     getListRiwayatProgramBantuan,
-    getDetailRiwayatProgramBantuan
+    getDetailRiwayatProgramBantuan,
+    absenMandiri
   }
 }
 

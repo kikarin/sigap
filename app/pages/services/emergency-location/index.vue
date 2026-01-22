@@ -13,6 +13,17 @@
     </div>
 
     <div class="flex-1 relative min-h-0" style="min-height: 300px;">
+      <div class="absolute top-2 right-2 z-[1000]">
+        <Button
+          label="Lokasi Saya"
+          icon="pi pi-crosshairs"
+          size="small"
+          outlined
+          @click="getMyLocation"
+          :loading="gettingLocation"
+          class="bg-white shadow-md"
+        />
+      </div>
       <ClientOnly>
         <template #default>
           <div ref="mapContainer" class="w-full h-full" style="min-height: 300px;"></div>
@@ -93,8 +104,10 @@ const selectedLocationId = ref(null)
 const mapContainer = ref(null)
 const locations = ref([])
 const loading = ref(false)
+const gettingLocation = ref(false)
 let map = null
 let markers = []
+let currentLocationMarker = null
 
 const mapKategoriToType = (kategori) => {
   if (kategori === 'polsek') return 'police'
@@ -308,7 +321,77 @@ onUnmounted(() => {
     map = null
   }
   markers = []
+  currentLocationMarker = null
 })
+
+const getMyLocation = () => {
+  gettingLocation.value = true
+  
+  if (!navigator.geolocation) {
+    toast.add({
+      severity: 'warn',
+      summary: 'Peringatan',
+      detail: 'Geolocation tidak didukung oleh browser Anda',
+      life: 3000
+    })
+    gettingLocation.value = false
+    return
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const { latitude, longitude } = position.coords
+      
+      if (map) {
+        // Hapus marker lokasi sebelumnya jika ada
+        if (currentLocationMarker) {
+          map.removeLayer(currentLocationMarker)
+          currentLocationMarker = null
+        }
+        
+        // Tambahkan marker untuk lokasi user
+        const userIcon = L.icon({
+          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41]
+        })
+        
+        currentLocationMarker = L.marker([latitude, longitude], { icon: userIcon })
+          .addTo(map)
+          .bindPopup('<b>Lokasi Saya</b>')
+        
+        // Zoom ke lokasi user
+        map.setView([latitude, longitude], 15)
+        
+        toast.add({
+          severity: 'success',
+          summary: 'Berhasil',
+          detail: 'Lokasi Anda berhasil ditemukan',
+          life: 2000
+        })
+      }
+      
+      gettingLocation.value = false
+    },
+    (error) => {
+      toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Gagal mendapatkan lokasi. Pastikan izin lokasi sudah diberikan.',
+        life: 3000
+      })
+      gettingLocation.value = false
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    }
+  )
+}
 
 const goBack = () => {
   router.back()

@@ -65,8 +65,20 @@
     @show="onMapDialogShow"
   >
     <div class="h-[400px] w-full relative">
+      <div class="absolute top-2 right-2 z-[1000]">
+        <Button
+          label="Lokasi Saya"
+          icon="pi pi-crosshairs"
+          size="small"
+          outlined
+          @click="getMyLocation"
+          :loading="gettingLocation"
+          class="bg-white shadow-md"
+        />
+      </div>
       <ClientOnly>
         <MapLeaflet
+          ref="mapRef"
           v-if="showMapDialog"
           :lat="mapLat"
           :lng="mapLng"
@@ -112,6 +124,7 @@
 
 <script setup>
 import { ref,  watch } from "vue";
+import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 
 const router = useRouter();
@@ -128,6 +141,8 @@ const tempLocation = ref(null);
 const reverseGeocodingLoading = ref(false);
 const deskripsiLokasi = ref(formData.value.deskripsi_lokasi || "");
 const loading = ref(false);
+const mapRef = ref(null);
+const gettingLocation = ref(false);
 
 // Reverse geocoding function
 const reverseGeocode = async (lat, lng) => {
@@ -249,6 +264,60 @@ const onMapDialogShow = async () => {
     };
   }
 };
+
+const getMyLocation = async () => {
+  gettingLocation.value = true
+  try {
+    if (mapRef.value && mapRef.value.getCurrentLocation) {
+      const location = await mapRef.value.getCurrentLocation()
+      if (location && location.lat && location.lng) {
+        await onLocationSelected({ lat: location.lat, lng: location.lng })
+      }
+    } else {
+      // Fallback: langsung gunakan geolocation
+      if (!navigator.geolocation) {
+        toast.add({
+          severity: 'warn',
+          summary: 'Peringatan',
+          detail: 'Geolocation tidak didukung oleh browser Anda',
+          life: 3000
+        })
+        return
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords
+          mapLat.value = latitude
+          mapLng.value = longitude
+          await onLocationSelected({ lat: latitude, lng: longitude })
+        },
+        (error) => {
+          toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Gagal mendapatkan lokasi. Pastikan izin lokasi sudah diberikan.',
+            life: 3000
+          })
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      )
+    }
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: error?.error || 'Gagal mendapatkan lokasi',
+      life: 3000
+    })
+  } finally {
+    gettingLocation.value = false
+  }
+}
 
 const goBack = () => {
   router.back();

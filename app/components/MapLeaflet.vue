@@ -4,7 +4,6 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref, watch, nextTick } from 'vue'
-import L from 'leaflet'
 
 const props = defineProps({
   lat: {
@@ -25,23 +24,34 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['location-selected'])
+const emit = defineEmits(['location-selected', 'current-location'])
 
 const mapContainer = ref(null)
 let map = null
 let marker = null
+let L = null
+let redIcon = null
 
-const redIcon = L.icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-})
+// Load Leaflet only on client-side
+const loadLeaflet = async () => {
+  if (import.meta.client && typeof window !== 'undefined') {
+    const leafletModule = await import('leaflet')
+    L = leafletModule.default || leafletModule
+    redIcon = L.icon({
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    })
+    return L
+  }
+  return null
+}
 
 const setupClickHandler = () => {
-  if (!map) return
+  if (!map || !L) return
   
   // Hapus semua event click yang ada
   map.off('click')
@@ -74,8 +84,14 @@ const setupClickHandler = () => {
   }
 }
 
-const initMap = () => {
-  if (!mapContainer.value || map) return
+const initMap = async () => {
+  if (!mapContainer.value || map || !import.meta.client) return
+
+  // Load Leaflet first
+  const Leaflet = await loadLeaflet()
+  if (!Leaflet) return
+
+  L = Leaflet
 
   // Inisialisasi Peta
   map = L.map(mapContainer.value).setView([props.lat, props.lng], props.zoom)
@@ -102,7 +118,9 @@ const initMap = () => {
 }
 
 onMounted(() => {
-  initMap()
+  if (import.meta.client) {
+    initMap()
+  }
 })
 
 // Watch untuk update selectable
@@ -112,7 +130,7 @@ watch(() => props.selectable, (newSelectable) => {
 
 // Watch untuk update marker jika props berubah
 watch(() => [props.lat, props.lng, props.zoom], ([newLat, newLng, newZoom]) => {
-  if (map) {
+  if (map && L) {
     if (marker) {
       marker.setLatLng([newLat, newLng])
     } else {
@@ -120,6 +138,58 @@ watch(() => [props.lat, props.lng, props.zoom], ([newLat, newLng, newZoom]) => {
     }
     map.setView([newLat, newLng], newZoom)
   }
+})
+
+const getCurrentLocation = () => {
+  return new Promise((resolve, reject) => {
+    if (!import.meta.client || typeof window === 'undefined' || !navigator.geolocation) {
+      const error = { error: 'Geolocation tidak didukung oleh browser Anda' }
+      emit('current-location', error)
+      reject(error)
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords
+        
+        // Update map view ke lokasi user
+        if (map && L) {
+          map.setView([latitude, longitude], 15)
+          
+          // Update marker
+          if (marker) {
+            map.removeLayer(marker)
+            marker = null
+          }
+          marker = L.marker([latitude, longitude], { icon: redIcon, draggable: false }).addTo(map)
+          
+          // Emit event
+          emit('location-selected', { lat: latitude, lng: longitude })
+          emit('current-location', { lat: latitude, lng: longitude })
+        }
+        
+        resolve({ lat: latitude, lng: longitude })
+      },
+      (error) => {
+        const errorMsg = {
+          error: 'Gagal mendapatkan lokasi. Pastikan izin lokasi sudah diberikan.'
+        }
+        emit('current-location', errorMsg)
+        reject(errorMsg)
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    )
+  })
+}
+
+// Expose method ke parent
+defineExpose({
+  getCurrentLocation
 })
 
 onUnmounted(() => {

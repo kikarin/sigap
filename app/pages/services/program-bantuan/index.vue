@@ -20,63 +20,73 @@
     </div>
 
     <template v-else>
-      <div v-if="programList.length > 0" class="px-5 py-4 space-y-4">
-        <Card
+      <div v-if="programList.length > 0" class="px-5 py-4 space-y-3">
+        <div
           v-for="program in programList"
           :key="program.id"
-          class="cursor-pointer hover:shadow-md transition-shadow border border-gray-200"
+          class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 cursor-pointer hover:shadow-md transition-all duration-200 hover:border-primary-200"
           @click="viewDetail(program.id)"
         >
-          <template #content>
-            <div class="space-y-3">
-              <div>
-                <h3 class="font-bold text-base text-gray-800 mb-2 line-clamp-2">
-                  {{ program.nama_program }}
-                </h3>
-                <div class="flex items-center gap-2 text-xs text-gray-500 mb-2 flex-wrap">
-                  <span>{{ formatTimeAgo(program.created_at) }}</span>
-                  <span v-if="program.status_program">•</span>
-                  <Tag
-                    v-if="program.status_program"
-                    :value="formatStatusProgram(program.status_program)"
-                    :severity="getStatusProgramSeverity(program.status_program)"
-                    class="text-xs"
-                  />
-                  <span v-if="program.status_penyaluran">•</span>
-                  <Tag
-                    v-if="program.status_penyaluran"
-                    :value="program.status_penyaluran_label || formatStatusPenyaluran(program.status_penyaluran)"
-                    :severity="getStatusPenyaluranSeverity(program.status_penyaluran)"
-                    class="text-xs"
-                  />
-                </div>
-              </div>
-              
-              <div class="space-y-1 text-sm text-gray-600">
-                <div v-if="program.tahun" class="flex items-center gap-2">
-                  <i class="pi pi-calendar text-gray-400"></i>
-                  <span>Tahun: {{ program.tahun }}</span>
-                </div>
-                <div v-if="program.periode" class="flex items-center gap-2">
-                  <i class="pi pi-clock text-gray-400"></i>
-                  <span>Periode: {{ program.periode }}</span>
-                </div>
-                <div v-if="program.target_type_label" class="flex items-center gap-2">
-                  <i class="pi pi-users text-gray-400"></i>
-                  <span>Tipe: {{ program.target_type_label }}</span>
-                </div>
-                <div v-if="program.tanggal_penyaluran" class="flex items-center gap-2">
-                  <i class="pi pi-check-circle text-gray-400"></i>
-                  <span>Tanggal Penyaluran: {{ formatDate(program.tanggal_penyaluran) }}</span>
-                </div>
-                <div v-if="program.penerima_lapangan_nama" class="flex items-center gap-2">
-                  <i class="pi pi-user text-gray-400"></i>
-                  <span>Penerima: {{ program.penerima_lapangan_nama }}</span>
-                </div>
+          <div class="space-y-3">
+            <div>
+              <h3 class="font-bold text-base text-gray-900 mb-2 line-clamp-2 leading-tight">
+                {{ program.nama_program }}
+              </h3>
+              <div class="flex items-center gap-2 text-xs text-gray-500 mb-3 flex-wrap">
+                <span>{{ formatTimeAgo(program.created_at) }}</span>
+                <span v-if="program.status_program">•</span>
+                <Tag
+                  v-if="program.status_program"
+                  :value="program.status_program_label || formatStatusProgram(program.status_program)"
+                  :severity="getStatusProgramSeverity(program.status_program)"
+                  class="text-xs"
+                />
+                <span v-if="program.status_penyaluran">•</span>
+                <Tag
+                  v-if="program.status_penyaluran"
+                  :value="program.status_penyaluran_label || formatStatusPenyaluran(program.status_penyaluran)"
+                  :severity="getStatusPenyaluranSeverity(program.status_penyaluran)"
+                  class="text-xs"
+                />
               </div>
             </div>
-          </template>
-        </Card>
+            
+            <div class="space-y-2 text-sm">
+              <div v-if="program.tahun" class="flex items-center gap-2 text-gray-600">
+                <i class="pi pi-calendar text-primary-500 text-xs"></i>
+                <span class="text-xs">Tahun: <span class="font-medium text-gray-800">{{ program.tahun }}</span></span>
+              </div>
+              <div v-if="program.periode" class="flex items-center gap-2 text-gray-600">
+                <i class="pi pi-clock text-primary-500 text-xs"></i>
+                <span class="text-xs">Periode: <span class="font-medium text-gray-800">{{ program.periode }}</span></span>
+              </div>
+              <div v-if="program.target_type_label" class="flex items-center gap-2 text-gray-600">
+                <i class="pi pi-users text-primary-500 text-xs"></i>
+                <span class="text-xs">Tipe: <span class="font-medium text-gray-800">{{ program.target_type_label }}</span></span>
+              </div>
+              <div v-if="program.desil_program?.label" class="flex items-center gap-2 p-2 bg-blue-50 rounded-lg border border-blue-100">
+                <i class="pi pi-chart-bar text-blue-600 text-xs"></i>
+                <span class="text-xs text-gray-600">Desil Program: <span class="font-semibold text-blue-700">{{ program.desil_program.label }}</span></span>
+              </div>
+              <div v-if="program.desil_keluarga_label" class="flex items-center gap-2 p-2 bg-blue-50 rounded-lg border border-blue-100">
+                <i class="pi pi-home text-blue-600 text-xs"></i>
+                <span class="text-xs text-gray-600">Desil Keluarga: <span class="font-semibold text-blue-700">{{ program.desil_keluarga_label }}</span></span>
+              </div>
+              <div v-if="program.jadwal_pengambilan?.label" class="flex items-center gap-2 p-2 bg-green-50 rounded-lg border border-green-100">
+                <i class="pi pi-calendar-times text-green-600 text-xs"></i>
+                <span class="text-xs text-gray-600">Jadwal: <span class="font-semibold text-green-700">{{ program.jadwal_pengambilan.label }}</span></span>
+              </div>
+              <div v-if="program.tanggal_penyaluran" class="flex items-center gap-2 text-gray-600">
+                <i class="pi pi-check-circle text-primary-500 text-xs"></i>
+                <span class="text-xs">Tanggal Penyaluran: <span class="font-medium text-gray-800">{{ formatDate(program.tanggal_penyaluran) }}</span></span>
+              </div>
+              <div v-if="program.penerima_lapangan_nama" class="flex items-center gap-2 text-gray-600">
+                <i class="pi pi-user text-primary-500 text-xs"></i>
+                <span class="text-xs">Penerima: <span class="font-medium text-gray-800">{{ program.penerima_lapangan_nama }}</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div v-if="hasMore" class="flex justify-center py-4">
           <Button
@@ -183,6 +193,7 @@ const viewDetail = (id) => {
 const formatStatusProgram = (status) => {
   const statusMap = {
     'PROSES': 'Proses',
+    'PENYALURAN': 'Penyaluran',
     'SELESAI': 'Selesai'
   }
   return statusMap[status] || status
@@ -191,6 +202,7 @@ const formatStatusProgram = (status) => {
 const getStatusProgramSeverity = (status) => {
   const severityMap = {
     'PROSES': 'warning',
+    'PENYALURAN': 'info',
     'SELESAI': 'success'
   }
   return severityMap[status] || null

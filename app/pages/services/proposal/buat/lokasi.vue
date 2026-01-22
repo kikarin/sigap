@@ -84,8 +84,20 @@
       @show="onMapDialogShow"
     >
       <div class="h-[400px] w-full relative">
+        <div class="absolute top-2 right-2 z-[1000]">
+          <Button
+            label="Lokasi Saya"
+            icon="pi pi-crosshairs"
+            size="small"
+            outlined
+            @click="getMyLocation"
+            :loading="gettingLocation"
+            class="bg-white shadow-md"
+          />
+        </div>
         <ClientOnly>
           <MapLeaflet
+            ref="mapRef"
             v-if="showMapDialog"
             :lat="mapLat"
             :lng="mapLng"
@@ -133,9 +145,11 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useToast } from "primevue/usetoast";
 import { useProposalForm } from '@/composables/useProposalForm'
 
 const router = useRouter()
+const toast = useToast()
 const { formData } = useProposalForm()
 
 const showMapDialog = ref(false);
@@ -144,12 +158,68 @@ const mapLng = ref(106.6438673);
 const selectedLocation = ref(null);
 const tempLocation = ref(null);
 const reverseGeocodingLoading = ref(false);
+const mapRef = ref(null);
+const gettingLocation = ref(false);
 
 
 const onMapDialogShow = () => {
   if (selectedLocation.value) {
     mapLat.value = selectedLocation.value.lat
     mapLng.value = selectedLocation.value.lng
+  }
+}
+
+const getMyLocation = async () => {
+  gettingLocation.value = true
+  try {
+    if (mapRef.value && mapRef.value.getCurrentLocation) {
+      const location = await mapRef.value.getCurrentLocation()
+      if (location && location.lat && location.lng) {
+        await onLocationSelected({ lat: location.lat, lng: location.lng })
+      }
+    } else {
+      // Fallback: langsung gunakan geolocation
+      if (!navigator.geolocation) {
+        toast.add({
+          severity: 'warn',
+          summary: 'Peringatan',
+          detail: 'Geolocation tidak didukung oleh browser Anda',
+          life: 3000
+        })
+        return
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords
+          mapLat.value = latitude
+          mapLng.value = longitude
+          await onLocationSelected({ lat: latitude, lng: longitude })
+        },
+        (error) => {
+          toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Gagal mendapatkan lokasi. Pastikan izin lokasi sudah diberikan.',
+            life: 3000
+          })
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      )
+    }
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: error?.error || 'Gagal mendapatkan lokasi',
+      life: 3000
+    })
+  } finally {
+    gettingLocation.value = false
   }
 }
 
