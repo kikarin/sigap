@@ -1,6 +1,20 @@
-# Nuxt Minimal Starter
+## PWA SIGAP – Ringkasan Endpoint Penting
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+### Pengajuan Proposal – Template Proposal
+
+- **Endpoint**: `GET /api/pwa/pengajuan-proposal/template`
+- **Deskripsi**: Mengembalikan informasi file template proposal yang harus diunduh dan diisi oleh warga sebelum di‑upload kembali sebagai `file_pendukung`.
+- **Response (contoh)**:
+  - `success` (bool)
+  - `data`:
+    - `url` – URL lengkap ke file template, misalnya `https://.../template-proposal.docx`
+    - `filename` – `template-proposal.docx`
+    - `note` – catatan singkat cara penggunaan template.
+- **Catatan Frontend (PWA)**:
+  - Di halaman form pengajuan proposal (langkah data kegiatan), panggil endpoint ini saat load.
+  - Tampilkan tombol **“Download Template Proposal”** yang mengarah ke `data.url`, serta teks penjelasan dari `data.note`.
+
+---
 
 ## Setup
 

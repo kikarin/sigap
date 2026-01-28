@@ -13,24 +13,6 @@
           <h1 class="font-semibold text-xl text-gray-800">Pengajuan Proposal</h1>
         </div>
       </div>
-      
-      <div class="px-5 pb-3">
-        <div class="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-          <button
-            v-for="category in filterCategories"
-            :key="category.id"
-            @click="handleCategoryChange(category.id)"
-            class="px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors"
-            :class="
-              selectedCategory === category.id
-                ? 'bg-primary-500 text-white'
-                : 'bg-white text-gray-600 border border-gray-200'
-            "
-          >
-            {{ category.label }}
-          </button>
-        </div>
-      </div>
     </div>
 
     <div v-if="loading" class="flex items-center justify-center min-h-[60vh]">
@@ -67,9 +49,12 @@
                     :severity="getStatusSeverity(proposal.status)"
                     class="text-xs"
                   />
-                  <span v-if="proposal.kategori_proposal_nama">•</span>
-                  <span v-if="proposal.kategori_proposal_nama" class="text-xs text-gray-500">
-                    {{ proposal.kategori_proposal_nama }}
+                  <span v-if="proposal.kategori_proposal">•</span>
+                  <span
+                    v-if="proposal.kategori_proposal"
+                    class="text-xs text-gray-500"
+                  >
+                    {{ proposal.kategori_proposal }}
                   </span>
                 </div>
               </div>
@@ -118,14 +103,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { Card, Button, Tag, ProgressSpinner } from 'primevue'
 import { useProposal } from '@/composables/useProposal'
 
 const router = useRouter()
 const toast = useToast()
-const { getKategoriProposal, getListPengajuanProposal } = useProposal()
+const { getListPengajuanProposal } = useProposal()
 
 const proposalList = ref([])
 const loading = ref(false)
@@ -133,46 +118,10 @@ const loadingMore = ref(false)
 const currentPage = ref(0)
 const perPage = ref(10)
 const hasMore = ref(false)
-const selectedCategory = ref(null)
-const kategoriList = ref([])
 const meta = ref({})
-
-const filterCategories = computed(() => {
-  const all = [{ id: null, label: 'Semua' }]
-  return [...all, ...kategoriList.value.map(kat => ({
-    id: kat.value,
-    label: kat.label
-  }))]
-})
 
 const goBack = () => {
   router.back()
-}
-
-const handleCategoryChange = (categoryId) => {
-  selectedCategory.value = categoryId
-  currentPage.value = 0
-  proposalList.value = []
-  hasMore.value = false
-  fetchProposal(0, false)
-}
-
-const fetchKategori = async () => {
-  try {
-    const response = await getKategoriProposal()
-    if (response.success && response.data) {
-      kategoriList.value = response.data
-    }
-  } catch (error) {
-    const err = error || {}
-    const errorMessage = (err.response && err.response.message) || err.message || 'Gagal memuat kategori proposal'
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: errorMessage,
-      life: 3000
-    })
-  }
 }
 
 const fetchProposal = async (page = 0, append = false) => {
@@ -185,27 +134,14 @@ const fetchProposal = async (page = 0, append = false) => {
   try {
     const params = {
       page: page || 0,
-      per_page: selectedCategory.value === null ? 10 : -1
+      per_page: perPage.value
     }
 
     const response = await getListPengajuanProposal(params)
 
     if (response && response.success) {
-      let data = Array.isArray(response.data) ? response.data : []
-      
-      if (selectedCategory.value !== null && selectedCategory.value !== undefined) {
-        const selectedKategori = kategoriList.value.find(k => k.value === selectedCategory.value)
-        if (selectedKategori) {
-          data = data.filter(item => {
-            const kategoriNama = (item.kategori_proposal_nama || '').trim().toLowerCase()
-            const kategoriLabel = (selectedKategori.label || '').trim().toLowerCase()
-            return kategoriNama === kategoriLabel
-          })
-        } else {
-          data = []
-        }
-      }
-      
+      const data = Array.isArray(response.data) ? response.data : []
+
       if (append) {
         proposalList.value = [...proposalList.value, ...data]
       } else {
@@ -214,12 +150,8 @@ const fetchProposal = async (page = 0, append = false) => {
       
       if (response.meta) {
         meta.value = response.meta
-        if (selectedCategory.value === null) {
-          hasMore.value = response.meta.current_page < Math.ceil(response.meta.total / response.meta.per_page)
-          currentPage.value = response.meta.current_page
-        } else {
-          hasMore.value = false
-        }
+        hasMore.value = response.meta.current_page < Math.ceil(response.meta.total / response.meta.per_page)
+        currentPage.value = response.meta.current_page
       }
     } else {
       proposalList.value = []
@@ -249,7 +181,6 @@ const loadMore = () => {
 }
 
 const viewDetail = (id) => {
-  // TODO: Implement detail page jika diperlukan
   router.push(`/services/proposal/${id}`)
 }
 
@@ -321,7 +252,6 @@ const formatCurrency = (amount) => {
 
 
 onMounted(async () => {
-  await fetchKategori()
   fetchProposal()
 })
 </script>

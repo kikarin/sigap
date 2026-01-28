@@ -87,16 +87,13 @@
             />
             <Tag
               v-if="!isEditMode"
-              :value="proposal.kategori_proposal_nama"
+              :value="proposal.kategori_proposal"
               severity="info"
             />
-            <Select
+            <InputText
               v-else
-              v-model="editData.kategori_proposal_id"
-              :options="kategoriOptions"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Pilih Kategori"
+              v-model="editData.kategori_proposal"
+              placeholder="Kategori Proposal"
               class="w-48"
             />
           </div>
@@ -417,19 +414,19 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
-import { Card, Button, Tag, ProgressSpinner, InputText, Textarea, InputNumber, InputMask, Select, Dialog, ConfirmDialog } from 'primevue'
+import { Card, Button, Tag, ProgressSpinner, InputText, Textarea, InputNumber, InputMask, Dialog, ConfirmDialog } from 'primevue'
 import { useProposal } from '@/composables/useProposal'
 
 const router = useRouter()
 const route = useRoute()
 const toast = useToast()
 const confirm = useConfirm()
-const { getDetailPengajuanProposal, updatePengajuanProposal, deletePengajuanProposal, getKategoriProposal, exportPDF } = useProposal()
+const { getDetailPengajuanProposal, updatePengajuanProposal, deletePengajuanProposal, exportPDF } = useProposal()
 
 const proposal = ref(null)
 const loading = ref(false)
@@ -437,12 +434,11 @@ const saving = ref(false)
 const exportingPDF = ref(false)
 const isEditMode = ref(false)
 const showMapDialog = ref(false)
-const kategoriOptions = ref([])
 const bannerInput = ref(null)
 const fileInput = ref(null)
 
 const editData = ref({
-  kategori_proposal_id: null,
+  kategori_proposal: '',
   nomor_telepon_pengaju: '',
   nama_kegiatan: '',
   deskripsi_kegiatan: '',
@@ -483,16 +479,6 @@ const fetchDetail = async () => {
   }
 }
 
-const fetchKategori = async () => {
-  try {
-    const response = await getKategoriProposal()
-    if (response.success && response.data) {
-      kategoriOptions.value = response.data
-    }
-  } catch (error) {
-  }
-}
-
 const enableEditMode = () => {
   if (!proposal.value) return
   
@@ -508,7 +494,7 @@ const enableEditMode = () => {
 
   isEditMode.value = true
   editData.value = {
-    kategori_proposal_id: proposal.value.kategori_proposal_id,
+    kategori_proposal: proposal.value.kategori_proposal,
     nomor_telepon_pengaju: proposal.value.nomor_telepon_pengaju || '',
     nama_kegiatan: proposal.value.nama_kegiatan,
     deskripsi_kegiatan: proposal.value.deskripsi_kegiatan,
@@ -527,7 +513,7 @@ const enableEditMode = () => {
 const cancelEdit = () => {
   isEditMode.value = false
   editData.value = {
-    kategori_proposal_id: null,
+    kategori_proposal: '',
     nomor_telepon_pengaju: '',
     nama_kegiatan: '',
     deskripsi_kegiatan: '',
@@ -548,8 +534,8 @@ const saveEdit = async () => {
 
   saving.value = true
   try {
-    const updateData = {
-      kategori_proposal_id: editData.value.kategori_proposal_id,
+    const updateData: any = {
+      kategori_proposal: editData.value.kategori_proposal,
       nomor_telepon_pengaju: editData.value.nomor_telepon_pengaju || undefined,
       nama_kegiatan: editData.value.nama_kegiatan,
       deskripsi_kegiatan: editData.value.deskripsi_kegiatan,
@@ -793,7 +779,6 @@ const formatCurrency = (amount) => {
 }
 
 onMounted(async () => {
-  await fetchKategori()
   await fetchDetail()
 })
 </script>

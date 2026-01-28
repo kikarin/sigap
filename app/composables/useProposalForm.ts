@@ -1,6 +1,6 @@
 export const useProposalForm = () => {
   const formData = useState('proposal-form-data', () => ({
-    kategori_proposal_id: null as number | null,
+    kategori_proposal: '' as string,
     nomor_telepon_pengaju: '',
     nama_kegiatan: '',
     deskripsi_kegiatan: '',
@@ -16,7 +16,7 @@ export const useProposalForm = () => {
 
   const resetForm = () => {
     formData.value = {
-      kategori_proposal_id: null,
+      kategori_proposal: '',
       nomor_telepon_pengaju: '',
       nama_kegiatan: '',
       deskripsi_kegiatan: '',

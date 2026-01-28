@@ -49,6 +49,7 @@
           />
         </div>
 
+        <!-- Template Proposal + File Pendukung -->
         <div class="flex flex-col gap-2">
           <label for="nomor-telepon" class="text-gray-700 text-sm font-medium">
             Nomor Telepon <span class="text-red-500">*</span>
@@ -71,10 +72,24 @@
         </div>
 
         <div class="flex flex-col gap-2">
-          <div class="mb-2">
-            <label class="block font-medium text-gray-700 text-sm mb-1">
-              File Pendukung <span class="text-red-500">*</span>
-            </label>
+          <div class="mb-2 space-y-2">
+            <div class="flex items-center justify-between gap-3">
+              <label class="block font-medium text-gray-700 text-sm">
+                File Pendukung <span class="text-red-500">*</span>
+              </label>
+              <Button
+                v-if="template && template.url"
+                type="button"
+                size="small"
+                icon="pi pi-download"
+                label="Download Template Proposal"
+                class="text-xs"
+                @click="downloadTemplate"
+              />
+            </div>
+            <Message v-if="template?.note" size="small" severity="secondary" variant="simple">
+              {{ template.note }}
+            </Message>
           </div>
 
           <!-- Upload Area -->
@@ -157,54 +172,70 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { useToast } from "primevue/usetoast";
 import { useProposalForm } from '@/composables/useProposalForm'
+import { useProposal } from '@/composables/useProposal'
 
 const router = useRouter()
 const route = useRoute()
+const toast = useToast()
 const { formData } = useProposalForm()
+const { getTemplateProposal } = useProposal()
 
-const fileInput = ref(null);
-const files = ref([]);
+const fileInput = ref<HTMLInputElement | null>(null);
+const files = ref<File[]>([]);
 const isDragging = ref(false);
+
+const template = ref<{
+  url: string
+  filename?: string
+  note?: string
+} | null>(null)
 
 
 const triggerFileInput = () => {
   fileInput.value?.click();
 };
 
-const handleFileSelect = (event) => {
-  const selectedFiles = Array.from(event.target.files || []);
+const handleFileSelect = (event: Event) => {
+  const target = event.target as HTMLInputElement | null
+  if (!target || !target.files) return
+  const selectedFiles = Array.from(target.files);
   addFiles(selectedFiles);
-  event.target.value = "";
+  target.value = "";
 };
 
-const handleDrop = (event) => {
+const handleDrop = (event: DragEvent) => {
   isDragging.value = false;
-  const droppedFiles = Array.from(event.dataTransfer.files || []);
+  const droppedFiles = Array.from(event.dataTransfer?.files || []);
   addFiles(droppedFiles);
 };
 
-const addFiles = (newFiles) => {
-  const validFiles = newFiles.filter((file) => {
-    const validTypes = [".pdf", ".doc", ".docx", ".xlsx", ".xls"];
-    const fileExtension = "." + file.name.split(".").pop().toLowerCase();
-    return validTypes.includes(fileExtension);
+const addFiles = (newFiles: File[] | undefined | null) => {
+  const allFiles: File[] = newFiles ? ([] as File[]).concat(newFiles) : []
+  const validTypes = [".pdf", ".doc", ".docx", ".xlsx", ".xls"];
+
+  const validFiles = allFiles.filter((file) => {
+    const parts = file.name ? file.name.split(".") : []
+    const lastPart = parts.length > 1 ? parts[parts.length - 1] : ""
+    const ext = lastPart ? "." + lastPart.toLowerCase() : ""
+    return validTypes.includes(ext);
   });
 
   files.value = [...files.value, ...validFiles];
   formData.value.file_pendukung = [...formData.value.file_pendukung, ...validFiles];
 };
 
-const removeFile = (index) => {
+const removeFile = (index: number) => {
   const removedFile = files.value[index]
   files.value.splice(index, 1);
   formData.value.file_pendukung = formData.value.file_pendukung.filter(f => f !== removedFile);
 };
 
-const formatFileSize = (bytes) => {
+const formatFileSize = (bytes: number) => {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
   const sizes = ["Bytes", "KB", "MB", "GB"];
@@ -217,17 +248,50 @@ const goBack = () => {
 }
 
 const handleNext = () => {
-  if (!formData.value.nama_kegiatan || !formData.value.deskripsi_kegiatan || !formData.value.usulan_anggaran || !formData.value.nomor_telepon_pengaju) {
+  if (
+    !formData.value.kategori_proposal ||
+    !formData.value.nama_kegiatan ||
+    !formData.value.deskripsi_kegiatan ||
+    !formData.value.usulan_anggaran ||
+    !formData.value.nomor_telepon_pengaju
+  ) {
     return
   }
 
   router.push('/services/proposal/buat/lokasi')
 }
 
-onMounted(() => {
-  if (route.query.kategori) {
-    formData.value.kategori_proposal_id = parseInt(route.query.kategori)
+const fetchTemplate = async () => {
+  try {
+    const response = await getTemplateProposal()
+    if (response && response.success && response.data) {
+      template.value = {
+        url: response.data.url,
+        filename: response.data.filename,
+        note: response.data.note
+      }
+    }
+  } catch (error: any) {
+    const message =
+      error?.response?.message ||
+      error?.message ||
+      'Gagal memuat informasi template proposal'
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: message,
+      life: 3000
+    })
   }
+}
+
+const downloadTemplate = () => {
+  if (!template.value?.url) return
+  window.open(template.value.url, '_blank')
+}
+
+onMounted(() => {
+  fetchTemplate()
 })
 
 definePageMeta({

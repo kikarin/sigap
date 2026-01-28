@@ -1,7 +1,7 @@
 import { useApi } from './useApi'
 
 export const useProposal = () => {
-  const { get, post, del } = useApi()
+  const { get, post, delete: del } = useApi()
 
   const getKategoriProposal = async () => {
     return get('/pengajuan-proposal/kategori')
@@ -12,7 +12,7 @@ export const useProposal = () => {
     per_page?: number
     search?: string
     filter_status?: string
-    filter_kategori_proposal_id?: number
+    filter_kategori_proposal?: string
     sort?: string
     order?: 'asc' | 'desc'
   }) => {
@@ -22,7 +22,7 @@ export const useProposal = () => {
     if (params?.per_page !== undefined) queryParams.append('per_page', params.per_page.toString())
     if (params?.search) queryParams.append('search', params.search)
     if (params?.filter_status) queryParams.append('filter_status', params.filter_status)
-    if (params?.filter_kategori_proposal_id !== undefined) queryParams.append('filter_kategori_proposal_id', params.filter_kategori_proposal_id.toString())
+    if (params?.filter_kategori_proposal) queryParams.append('filter_kategori_proposal', params.filter_kategori_proposal)
     if (params?.sort) queryParams.append('sort', params.sort)
     if (params?.order) queryParams.append('order', params.order)
 
@@ -36,8 +36,16 @@ export const useProposal = () => {
     return get(`/pengajuan-proposal/${id}`)
   }
 
+  /**
+   * Ambil informasi template proposal (URL, nama file, dan catatan).
+   * Backend endpoint: GET /api/pwa/pengajuan-proposal/template
+   */
+  const getTemplateProposal = async () => {
+    return get('/pengajuan-proposal/template')
+  }
+
   const createPengajuanProposal = async (data: {
-    kategori_proposal_id: number
+    kategori_proposal: string
     nomor_telepon_pengaju?: string
     nama_kegiatan: string
     deskripsi_kegiatan: string
@@ -52,7 +60,7 @@ export const useProposal = () => {
   }) => {
     const formData = new FormData()
 
-    formData.append('kategori_proposal_id', data.kategori_proposal_id.toString())
+    formData.append('kategori_proposal', data.kategori_proposal)
     if (data.nomor_telepon_pengaju) formData.append('nomor_telepon_pengaju', data.nomor_telepon_pengaju)
     formData.append('nama_kegiatan', data.nama_kegiatan)
     formData.append('deskripsi_kegiatan', data.deskripsi_kegiatan)
@@ -106,7 +114,7 @@ export const useProposal = () => {
   }
 
   const updatePengajuanProposal = async (id: number, data: {
-    kategori_proposal_id?: number
+    kategori_proposal?: string
     nomor_telepon_pengaju?: string
     nama_kegiatan?: string
     deskripsi_kegiatan?: string
@@ -122,7 +130,9 @@ export const useProposal = () => {
   }) => {
     const formData = new FormData()
 
-    if (data.kategori_proposal_id !== undefined) formData.append('kategori_proposal_id', data.kategori_proposal_id.toString())
+    if (data.kategori_proposal !== undefined && data.kategori_proposal !== null) {
+      formData.append('kategori_proposal', data.kategori_proposal)
+    }
     if (data.nomor_telepon_pengaju !== undefined && data.nomor_telepon_pengaju !== null) formData.append('nomor_telepon_pengaju', data.nomor_telepon_pengaju)
     if (data.nama_kegiatan !== undefined && data.nama_kegiatan !== null) formData.append('nama_kegiatan', data.nama_kegiatan)
     if (data.deskripsi_kegiatan !== undefined && data.deskripsi_kegiatan !== null) formData.append('deskripsi_kegiatan', data.deskripsi_kegiatan)
@@ -214,6 +224,7 @@ export const useProposal = () => {
     getKategoriProposal,
     getListPengajuanProposal,
     getDetailPengajuanProposal,
+    getTemplateProposal,
     createPengajuanProposal,
     updatePengajuanProposal,
     deletePengajuanProposal,
