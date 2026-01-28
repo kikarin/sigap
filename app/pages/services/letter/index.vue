@@ -101,7 +101,10 @@
       </div>
     </template>
 
-    <div class="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-20">
+    <div
+      v-if="!isRT"
+      class="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-20"
+    >
       <Button
         label="Buat Surat"
         icon="pi pi-plus"
@@ -114,15 +117,17 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { Card, Button, Tag, ProgressSpinner } from 'primevue'
 import { useLetter } from '@/composables/useLetter'
 
+const { user } = useAuth()
+
 const router = useRouter()
 const toast = useToast()
-const { getJenisSurat, getListPengajuanSurat } = useLetter()
+const { getJenisSurat, getListPengajuanSurat, getListPengajuanSuratRT } = useLetter()
 
 const suratList = ref([])
 const loading = ref(false)
@@ -133,6 +138,13 @@ const hasMore = ref(false)
 const selectedCategory = ref(null)
 const kategoriList = ref([])
 const meta = ref({})
+
+const isRT = computed(() => {
+  const u: any = user.value
+  if (!u) return false
+  const roleId = u.role?.id ?? u.role_id ?? null
+  return roleId === 36
+})
 
 const filterCategories = computed(() => {
   const all = [{ id: null, label: 'Semua' }]
@@ -177,11 +189,14 @@ const fetchSurat = async (page = 0, append = false) => {
       per_page: perPage.value
     }
 
-    if (selectedCategory.value) {
+    // Filter jenis surat hanya untuk warga (RT lihat semua pengajuan di RT-nya)
+    if (!isRT.value && selectedCategory.value) {
       params.filter_jenis_surat_id = selectedCategory.value
     }
 
-    const response = await getListPengajuanSurat(params)
+    const response = await (isRT.value
+      ? getListPengajuanSuratRT(params)
+      : getListPengajuanSurat(params))
     
     if (response && response.success) {
       if (response.data && Array.isArray(response.data)) {

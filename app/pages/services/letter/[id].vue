@@ -246,40 +246,106 @@
         </template>
       </Card>
 
-      <div class="flex gap-3 pt-4">
-        <Button
-          v-if="!isEditMode && surat.can_be_edited"
-          label="Edit"
-          icon="pi pi-pencil"
-          outlined
-          class="flex-1"
-          @click="enableEditMode"
-        />
-        <Button
-          v-else-if="isEditMode"
-          label="Batal"
-          icon="pi pi-times"
-          severity="secondary"
-          outlined
-          class="flex-1"
-          @click="cancelEdit"
-        />
-        <Button
-          v-if="!isEditMode && surat.status === 'disetujui'"
-          label="Download PDF"
-          icon="pi pi-download"
-          class="flex-1"
-          :loading="exportingPDF"
-          @click="handleExportPDF"
-        />
-        <Button
-          v-if="isEditMode"
-          label="Simpan"
-          icon="pi pi-check"
-          class="flex-1"
-          :loading="saving"
-          @click="saveEdit"
-        />
+      <div class="flex flex-col gap-4 pt-4">
+        <!-- Aksi warga (edit / download) -->
+        <div class="flex gap-3" v-if="!isRT">
+          <Button
+            v-if="!isEditMode && surat.can_be_edited"
+            label="Edit"
+            icon="pi pi-pencil"
+            outlined
+            class="flex-1"
+            @click="enableEditMode"
+          />
+          <Button
+            v-else-if="isEditMode"
+            label="Batal"
+            icon="pi pi-times"
+            severity="secondary"
+            outlined
+            class="flex-1"
+            @click="cancelEdit"
+          />
+          <Button
+            v-if="!isEditMode && surat.status === 'disetujui'"
+            label="Download PDF"
+            icon="pi pi-download"
+            class="flex-1"
+            :loading="exportingPDF"
+            @click="handleExportPDF"
+          />
+          <Button
+            v-if="isEditMode"
+            label="Simpan"
+            icon="pi pi-check"
+            class="flex-1"
+            :loading="saving"
+            @click="saveEdit"
+          />
+        </div>
+
+        <!-- Aksi verifikasi RT -->
+        <Card
+          v-if="isRT && surat.status === 'menunggu'"
+          class="border border-primary-200 bg-primary-50/50"
+        >
+          <template #content>
+            <div class="space-y-3">
+              <h3 class="font-semibold text-base text-gray-800">
+                Verifikasi Pengajuan oleh RT
+              </h3>
+
+              <div class="space-y-2">
+                <p class="text-xs text-gray-500">Status Verifikasi</p>
+                <div class="flex gap-2">
+                  <Button
+                    label="Setujui"
+                    icon="pi pi-check"
+                    size="small"
+                    :outlined="verifikasiStatus !== 'diverifikasi_rt'"
+                    :severity="verifikasiStatus === 'diverifikasi_rt' ? 'success' : 'secondary'"
+                    @click="verifikasiStatus = 'diverifikasi_rt'"
+                  />
+                  <Button
+                    label="Tolak"
+                    icon="pi pi-times"
+                    size="small"
+                    :outlined="verifikasiStatus !== 'ditolak'"
+                    :severity="verifikasiStatus === 'ditolak' ? 'danger' : 'secondary'"
+                    @click="verifikasiStatus = 'ditolak'"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <p class="text-xs text-gray-500 mb-1">
+                  Catatan / Alasan (opsional, wajib diisi jika menolak)
+                </p>
+                <Textarea
+                  v-model="verifikasiCatatan"
+                  rows="3"
+                  placeholder="Tuliskan catatan/verifikasi atau alasan penolakan"
+                  class="w-full text-sm"
+                />
+              </div>
+
+              <div class="flex gap-2 pt-1">
+                <Button
+                  label="Simpan Verifikasi"
+                  icon="pi pi-check-circle"
+                  class="flex-1"
+                  :loading="verifikasiLoading"
+                  :disabled="
+                    verifikasiLoading ||
+                    !verifikasiStatus ||
+                    (verifikasiStatus === 'ditolak' && !verifikasiCatatan.trim())
+                  "
+                  @click="handleVerifikasiRT"
+                />
+              </div>
+            </div>
+          </template>
+        </Card>
       </div>
     </div>
 
@@ -326,18 +392,27 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
-import { Card, Button, Tag, ProgressSpinner, Dialog, ConfirmDialog, InputText, Select, Checkbox, FileUpload } from 'primevue'
+import { Card, Button, Tag, ProgressSpinner, Dialog, ConfirmDialog, InputText, Select, Checkbox, FileUpload, Textarea } from 'primevue'
 import { useLetter } from '@/composables/useLetter'
 
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 const confirm = useConfirm()
-const { getDetailPengajuanSurat, deletePengajuanSurat, updatePengajuanSurat, exportPDF, getDetailJenisSurat } = useLetter()
+const { user } = useAuth()
+const {
+  getDetailPengajuanSurat,
+  getDetailPengajuanSuratRT,
+  deletePengajuanSurat,
+  updatePengajuanSurat,
+  exportPDF,
+  getDetailJenisSurat,
+  verifikasiPengajuanSuratRT
+} = useLetter()
 
 const surat = ref(null)
 const loading = ref(false)
@@ -350,13 +425,31 @@ const isEditMode = ref(false)
 const editData = ref({})
 const atributConfig = ref({})
 
+const isRT = computed(() => {
+  const u: any = user.value
+  if (!u) return false
+  const roleId = u.role?.id ?? u.role_id ?? null
+  return roleId === 36
+})
+
+// State verifikasi RT
+const verifikasiStatus = ref<'diverifikasi_rt' | 'ditolak' | ''>('' as any)
+const verifikasiCatatan = ref('')
+const verifikasiLoading = ref(false)
+
 const fetchDetail = async (forceRefresh = false) => {
   loading.value = true
   try {
     const params = forceRefresh ? { _t: Date.now() } : {}
-    const response = await getDetailPengajuanSurat(parseInt(route.params.id))
+    const id = parseInt(route.params.id as string)
+    const response = await (isRT.value
+      ? getDetailPengajuanSuratRT(id)
+      : getDetailPengajuanSurat(id))
     if (response.success && response.data) {
       surat.value = response.data
+      // Reset state verifikasi saat data baru
+      verifikasiStatus.value = '' as any
+      verifikasiCatatan.value = ''
     } else {
       toast.add({
         severity: 'error',
@@ -380,6 +473,7 @@ const fetchDetail = async (forceRefresh = false) => {
 }
 
 const enableEditMode = async () => {
+  if (isRT.value) return
   if (!surat.value || !surat.value.can_be_edited) return
   
   try {
@@ -536,6 +630,7 @@ const getFilePreview = (file) => {
 
 const saveEdit = async () => {
   if (!surat.value) return
+  if (isRT.value) return
   
   saving.value = true
   
@@ -592,6 +687,7 @@ const saveEdit = async () => {
 }
 
 const handleDelete = () => {
+  if (isRT.value) return
   confirm.require({
     message: 'Apakah Anda yakin ingin menghapus pengajuan surat ini?',
     header: 'Konfirmasi Hapus',
@@ -662,6 +758,67 @@ const handleExportPDF = async () => {
 const openImagePreview = (imageUrl, index = 0) => {
   previewImageUrl.value = imageUrl
   imagePreviewVisible.value = true
+}
+
+const handleVerifikasiRT = async () => {
+  if (!isRT.value || !surat.value) return
+  if (!verifikasiStatus.value) {
+    toast.add({
+      severity: 'warn',
+      summary: 'Peringatan',
+      detail: 'Silakan pilih status verifikasi terlebih dahulu',
+      life: 3000
+    })
+    return
+  }
+
+  if (verifikasiStatus.value === 'ditolak' && !verifikasiCatatan.value.trim()) {
+    toast.add({
+      severity: 'warn',
+      summary: 'Peringatan',
+      detail: 'Catatan/alasan wajib diisi jika pengajuan ditolak',
+      life: 3000
+    })
+    return
+  }
+
+  verifikasiLoading.value = true
+  try {
+    const id = parseInt(route.params.id)
+    const response = await verifikasiPengajuanSuratRT(id, {
+      status: verifikasiStatus.value,
+      rt_catatan: verifikasiCatatan.value || undefined
+    })
+
+    if (response && response.success) {
+      toast.add({
+        severity: 'success',
+        summary: 'Berhasil',
+        detail: response.message || 'Pengajuan surat berhasil diverifikasi oleh RT',
+        life: 3000
+      })
+
+      if (response.data) {
+        surat.value = response.data
+      } else {
+        await fetchDetail(true)
+      }
+    }
+  } catch (error) {
+    const err: any = error || {}
+    const errorMessage =
+      (err.response && err.response.message) ||
+      err.message ||
+      'Gagal memproses verifikasi RT'
+    toast.add({
+      severity: 'error',
+      summary: 'Gagal',
+      detail: errorMessage,
+      life: 4000
+    })
+  } finally {
+    verifikasiLoading.value = false
+  }
 }
 
 const formatStatus = (status) => {

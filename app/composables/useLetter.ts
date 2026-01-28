@@ -40,6 +40,44 @@ export const useLetter = () => {
     return get(`/pengajuan-surat/${id}`)
   }
 
+  /**
+   * Endpoint khusus RT - list pengajuan surat warga di RT tersebut
+   */
+  const getListPengajuanSuratRT = async (params?: {
+    page?: number
+    per_page?: number
+  }) => {
+    const queryParams = new URLSearchParams()
+
+    if (params?.page !== undefined) queryParams.append('page', params.page.toString())
+    if (params?.per_page !== undefined) queryParams.append('per_page', params.per_page.toString())
+
+    const queryString = queryParams.toString()
+    const endpoint = `/pengajuan-surat-rt${queryString ? `?${queryString}` : ''}`
+
+    return get(endpoint)
+  }
+
+  /**
+   * Endpoint khusus RT - detail pengajuan surat warga di RT tersebut
+   */
+  const getDetailPengajuanSuratRT = async (id: number) => {
+    return get(`/pengajuan-surat-rt/${id}`)
+  }
+
+  /**
+   * Endpoint khusus RT - verifikasi pengajuan surat
+   */
+  const verifikasiPengajuanSuratRT = async (
+    id: number,
+    data: {
+      status: 'diverifikasi_rt' | 'ditolak'
+      rt_catatan?: string
+    }
+  ) => {
+    return post(`/pengajuan-surat-rt/${id}/verifikasi`, data)
+  }
+
   const createPengajuanSurat = async (data: {
     jenis_surat_id: number
     tanggal_surat: string
@@ -145,6 +183,9 @@ export const useLetter = () => {
     getDetailJenisSurat,
     getListPengajuanSurat,
     getDetailPengajuanSurat,
+    getListPengajuanSuratRT,
+    getDetailPengajuanSuratRT,
+    verifikasiPengajuanSuratRT,
     createPengajuanSurat,
     updatePengajuanSurat,
     deletePengajuanSurat,
