@@ -45,7 +45,7 @@
           <div v-if="!isEditMode" class="flex items-start gap-2">
             <h2 class="font-bold text-xl text-gray-800 mb-2 flex-1">{{ aduan.judul }}</h2>
             <Button
-              v-if="!isEditMode"
+              v-if="!isEditMode && !isRT"
               icon="pi pi-pencil"
               text
               rounded
@@ -92,7 +92,7 @@
             <div class="flex items-center justify-between mb-2">
               <h3 class="font-semibold text-base text-gray-800">Deskripsi Aduan</h3>
               <Button
-                v-if="!isEditMode"
+                v-if="!isEditMode && !isRT"
                 icon="pi pi-pencil"
                 text
                 rounded
@@ -120,7 +120,7 @@
             <div class="flex items-center justify-between mb-3">
               <h3 class="font-semibold text-base text-gray-800">Lokasi</h3>
               <Button
-                v-if="!isEditMode"
+                v-if="!isEditMode && !isRT"
                 icon="pi pi-pencil"
                 text
                 rounded
@@ -206,7 +206,7 @@
             <div class="flex items-center justify-between mb-3">
               <h3 class="font-semibold text-base text-gray-800">Bukti Laporan</h3>
               <Button
-                v-if="!isEditMode"
+                v-if="!isEditMode && !isRT"
                 icon="pi pi-pencil"
                 text
                 rounded
@@ -301,7 +301,7 @@
             <div class="flex items-center justify-between mb-2">
               <h3 class="font-semibold text-base text-gray-800">Alasan Melaporkan</h3>
               <Button
-                v-if="!isEditMode"
+                v-if="!isEditMode && !isRT"
                 icon="pi pi-pencil"
                 text
                 rounded
@@ -323,7 +323,8 @@
         </template>
       </Card>
 
-      <div class="flex gap-3 pt-4">
+      <!-- Aksi Warga (Edit / Delete) -->
+      <div v-if="!isRT" class="flex gap-3 pt-4">
         <Button
           v-if="!isEditMode"
           label="Edit"
@@ -359,6 +360,69 @@
           @click="saveEdit"
         />
       </div>
+
+      <!-- Aksi Verifikasi RT -->
+      <Card
+        v-if="isRT && aduan && aduan.status === 'menunggu_verifikasi'"
+        class="border border-primary-200 bg-primary-50/50 mt-4"
+      >
+        <template #content>
+          <div class="space-y-3">
+            <h3 class="font-semibold text-base text-gray-800">
+              Verifikasi Aduan oleh RT
+            </h3>
+
+            <div class="space-y-2">
+              <p class="text-xs text-gray-500">Status Verifikasi</p>
+              <div class="flex gap-2">
+                <Button
+                  label="Setujui"
+                  icon="pi pi-check"
+                  size="small"
+                  :outlined="verifikasiStatus !== 'diverifikasi_rt'"
+                  :severity="verifikasiStatus === 'diverifikasi_rt' ? 'success' : 'secondary'"
+                  @click="verifikasiStatus = 'diverifikasi_rt'"
+                />
+                <Button
+                  label="Batalkan"
+                  icon="pi pi-times"
+                  size="small"
+                  :outlined="verifikasiStatus !== 'dibatalkan'"
+                  :severity="verifikasiStatus === 'dibatalkan' ? 'danger' : 'secondary'"
+                  @click="verifikasiStatus = 'dibatalkan'"
+                />
+              </div>
+            </div>
+
+            <div>
+              <p class="text-xs text-gray-500 mb-1">
+                Catatan / Alasan (opsional, wajib diisi jika dibatalkan)
+              </p>
+              <Textarea
+                v-model="verifikasiCatatan"
+                rows="3"
+                placeholder="Tuliskan catatan verifikasi atau alasan pembatalan"
+                class="w-full text-sm"
+              />
+            </div>
+
+            <div class="flex gap-2 pt-1">
+              <Button
+                label="Simpan Verifikasi"
+                icon="pi pi-check-circle"
+                class="flex-1"
+                :loading="verifikasiLoading"
+                :disabled="
+                  verifikasiLoading ||
+                  !verifikasiStatus ||
+                  (verifikasiStatus === 'dibatalkan' && !verifikasiCatatan.trim())
+                "
+                @click="handleVerifikasiRT"
+              />
+            </div>
+          </div>
+        </template>
+      </Card>
     </div>
 
     <Dialog
@@ -428,18 +492,28 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { Card, Button, Dialog, ProgressSpinner, Tag, InputText, Textarea, Select, FileUpload } from 'primevue'
+import { useAduan } from '@/composables/useAduan'
+import { useAuth } from '@/composables/useAuth'
 
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
-const { getDetailAduan, deleteAduan, updateAduan, getKategoriAduan } = useAduan()
+const { user } = useAuth()
+const { getDetailAduan, getDetailAduanRT, deleteAduan, updateAduan, getKategoriAduan, verifikasiAduanRT } = useAduan()
 
-const aduan = ref(null)
+const isRT = computed(() => {
+  const u: any = user.value
+  if (!u) return false
+  const roleId = u.role?.id ?? u.role_id ?? null
+  return roleId === 36
+})
+
+const aduan = ref<any>(null)
 const loading = ref(false)
 const deleting = ref(false)
 const saving = ref(false)
@@ -447,10 +521,15 @@ const showDeleteDialog = ref(false)
 const showImageDialog = ref(false)
 const currentImageIndex = ref(0)
 const isEditMode = ref(false)
-const editData = ref({})
-const kategoriOptions = ref([])
+const editData = ref<any>({})
+const kategoriOptions = ref<any[]>([])
 const showMapDialog = ref(false)
 const reverseGeocodingLoading = ref(false)
+
+// RT Verification
+const verifikasiStatus = ref<'diverifikasi_rt' | 'dibatalkan' | null>(null)
+const verifikasiCatatan = ref('')
+const verifikasiLoading = ref(false)
 
 const goBack = () => {
   router.back()
@@ -464,7 +543,7 @@ const fetchDetail = async (forceRefresh = false) => {
 
   try {
     const params = forceRefresh ? { _t: Date.now() } : {}
-    const response = await getDetailAduan(id, params)
+    const response = await (isRT.value ? getDetailAduanRT(id) : getDetailAduan(id, params))
     if (response.success && response.data) {
       aduan.value = {
         ...response.data,
@@ -489,6 +568,7 @@ const fetchDetail = async (forceRefresh = false) => {
 
 const enableEditMode = async () => {
   if (!aduan.value) return
+  if (isRT.value) return // RT tidak boleh mengedit aduan warga
   
   try {
     const kategoriResponse = await getKategoriAduan()
@@ -614,6 +694,7 @@ const onLocationSelected = async (location) => {
 
 const saveEdit = async () => {
   if (!aduan.value) return
+  if (isRT.value) return // RT tidak boleh mengedit aduan warga
   
   saving.value = true
   
@@ -768,6 +849,7 @@ const currentImage = computed(() => {
 
 const handleDelete = async () => {
   if (!aduan.value) return
+  if (isRT.value) return // RT tidak boleh menghapus aduan warga
 
   deleting.value = true
 
@@ -797,24 +879,68 @@ const handleDelete = async () => {
   }
 }
 
-const formatStatus = (status) => {
-  const statusMap = {
+const handleVerifikasiRT = async () => {
+  if (!aduan.value || !verifikasiStatus.value) return
+
+  verifikasiLoading.value = true
+
+  try {
+    const response = await verifikasiAduanRT(aduan.value.id, {
+      status: verifikasiStatus.value,
+      rt_catatan: verifikasiCatatan.value || undefined
+    })
+
+    if (response.success) {
+      toast.add({
+        severity: 'success',
+        summary: 'Berhasil',
+        detail: response.message || 'Aduan berhasil diverifikasi',
+        life: 3000
+      })
+
+      // Reset form
+      verifikasiStatus.value = null
+      verifikasiCatatan.value = ''
+
+      // Refresh detail
+      await fetchDetail(true)
+    }
+  } catch (error: any) {
+    const err = error || {}
+    const errorMessage = (err.response && err.response.message) || err.message || 'Gagal memverifikasi aduan'
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: errorMessage,
+      life: 5000
+    })
+  } finally {
+    verifikasiLoading.value = false
+  }
+}
+
+const formatStatus = (status: string) => {
+  const statusMap: { [key: string]: string } = {
     'menunggu_verifikasi': 'Menunggu Verifikasi',
-    'diverifikasi': 'Diverifikasi',
+    'diverifikasi_rt': 'Diverifikasi RT',
+    'diverifikasi_admin': 'Diverifikasi Admin',
     'ditolak': 'Ditolak',
     'diproses': 'Diproses',
-    'selesai': 'Selesai'
+    'selesai': 'Selesai',
+    'dibatalkan': 'Dibatalkan'
   }
   return statusMap[status] || status
 }
 
-const getStatusSeverity = (status) => {
-  const severityMap = {
+const getStatusSeverity = (status: string) => {
+  const severityMap: { [key: string]: string } = {
     'menunggu_verifikasi': 'warning',
-    'diverifikasi': 'info',
+    'diverifikasi_rt': 'info',
+    'diverifikasi_admin': 'info',
     'ditolak': 'danger',
     'diproses': 'secondary',
-    'selesai': 'success'
+    'selesai': 'success',
+    'dibatalkan': 'danger'
   }
   return severityMap[status] || null
 }

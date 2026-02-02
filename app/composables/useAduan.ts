@@ -45,6 +45,7 @@ export const useAduan = () => {
     deskripsi_lokasi: string
     jenis_aduan: string
     alasan_melaporkan?: string
+    layanan_darurat_ids?: number[]
     files?: File[]
   }) => {
     const formData = new FormData()
@@ -59,6 +60,12 @@ export const useAduan = () => {
     formData.append('jenis_aduan', data.jenis_aduan)
     if (data.alasan_melaporkan) {
       formData.append('alasan_melaporkan', data.alasan_melaporkan)
+    }
+    
+    if (data.layanan_darurat_ids && data.layanan_darurat_ids.length > 0) {
+      data.layanan_darurat_ids.forEach((id) => {
+        formData.append('layanan_darurat_ids[]', id.toString())
+      })
     }
     
     if (data.files && data.files.length > 0) {
@@ -106,6 +113,7 @@ export const useAduan = () => {
     deskripsi_lokasi?: string
     jenis_aduan?: string
     alasan_melaporkan?: string
+    layanan_darurat_ids?: number[]
     deleted_files?: number[]
     files?: File[]
   }) => {
@@ -120,6 +128,12 @@ export const useAduan = () => {
     if (data.deskripsi_lokasi !== undefined && data.deskripsi_lokasi !== null) formData.append('deskripsi_lokasi', data.deskripsi_lokasi)
     if (data.jenis_aduan !== undefined && data.jenis_aduan !== null) formData.append('jenis_aduan', data.jenis_aduan)
     if (data.alasan_melaporkan !== undefined && data.alasan_melaporkan !== null) formData.append('alasan_melaporkan', data.alasan_melaporkan)
+    
+    if (data.layanan_darurat_ids && data.layanan_darurat_ids.length > 0) {
+      data.layanan_darurat_ids.forEach((id) => {
+        formData.append('layanan_darurat_ids[]', id.toString())
+      })
+    }
     
     if (data.deleted_files && data.deleted_files.length > 0) {
       data.deleted_files.forEach((fileId) => {
@@ -171,13 +185,47 @@ export const useAduan = () => {
     return get('/aduan-masyarakat/kategori')
   }
 
+  // RT Endpoints
+  const getListAduanRT = async (params?: {
+    page?: number
+    per_page?: number
+    search?: string
+    status?: string
+  }) => {
+    const queryParams = new URLSearchParams()
+    
+    if (params?.page !== undefined) queryParams.append('page', params.page.toString())
+    if (params?.per_page !== undefined) queryParams.append('per_page', params.per_page.toString())
+    if (params?.search) queryParams.append('search', params.search)
+    if (params?.status) queryParams.append('status', params.status)
+
+    const queryString = queryParams.toString()
+    const endpoint = `/aduan-masyarakat-rt${queryString ? `?${queryString}` : ''}`
+    
+    return get(endpoint)
+  }
+
+  const getDetailAduanRT = async (id: number) => {
+    return get(`/aduan-masyarakat-rt/${id}`)
+  }
+
+  const verifikasiAduanRT = async (id: number, data: {
+    status: 'diverifikasi_rt' | 'dibatalkan'
+    rt_catatan?: string
+  }) => {
+    return post(`/aduan-masyarakat-rt/${id}/verifikasi`, data)
+  }
+
   return {
     getListAduan,
     getDetailAduan,
     createAduan,
     updateAduan,
     deleteAduan,
-    getKategoriAduan
+    getKategoriAduan,
+    getListAduanRT,
+    getDetailAduanRT,
+    verifikasiAduanRT
   }
 }
 

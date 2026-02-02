@@ -92,7 +92,6 @@
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { Button } from 'primevue'
-import L from 'leaflet'
 
 const router = useRouter()
 const toast = useToast()
@@ -108,11 +107,13 @@ const gettingLocation = ref(false)
 let map = null
 let markers = []
 let currentLocationMarker = null
+let L = null
 
 const mapKategoriToType = (kategori) => {
-  if (kategori === 'polsek') return 'police'
-  if (kategori === 'puskesmas' || kategori === 'rumah_sakit') return 'hospital'
+  if (kategori === 'bhabinkamtibmas') return 'police'
+  if (kategori === 'mobil_siaga') return 'hospital'
   if (kategori === 'pemadam_kebakaran') return 'fire'
+  if (kategori === 'kantor_desa') return 'office'
   return 'hospital'
 }
 
@@ -184,33 +185,33 @@ const fetchLayananDarurat = async (kategori = null) => {
 
 const filteredLocations = computed(() => {
   if (!selectedFilter.value) return locations.value
-  const filter = filters.value.find(f => f.id === selectedFilter.value)
-  if (!filter) return locations.value
-  return locations.value.filter(loc => loc.type === filter.type)
+  return locations.value.filter(loc => loc.kategori === selectedFilter.value)
 })
 
 const getLocationIcon = (kategori) => {
-  if (kategori === 'rumah_sakit') return '/icons/hospital.png'
-  if (kategori === 'puskesmas') return '/icons/hospital.png'
-  if (kategori === 'polsek') return '/icons/police-car.png'
+  if (kategori === 'bhabinkamtibmas') return '/icons/police-car.png'
+  if (kategori === 'mobil_siaga') return '/icons/ambulance.png'
   if (kategori === 'pemadam_kebakaran') return '/icons/firefighter.png'
+  if (kategori === 'kantor_desa') return '/icons/kantor-desa.png'
   return '/icons/marker.png'
 }
 
 const getLocationIconClass = (kategori) => {
-  if (kategori === 'rumah_sakit') return 'bg-green-500'
-  if (kategori === 'puskesmas') return 'bg-emerald-500'
-  if (kategori === 'polsek') return 'bg-blue-500'
+  if (kategori === 'bhabinkamtibmas') return 'bg-blue-500'
+  if (kategori === 'mobil_siaga') return 'bg-emerald-500'
   if (kategori === 'pemadam_kebakaran') return 'bg-red-500'
+  if (kategori === 'kantor_desa') return 'bg-orange-500'
   return 'bg-gray-500'
 }
 
 const getMarkerIcon = (kategori) => {
+  if (!L) return null
+  
   let color = 'green'
-  if (kategori === 'rumah_sakit') color = 'green'
-  else if (kategori === 'puskesmas') color = 'green'
-  else if (kategori === 'polsek') color = 'blue'
+  if (kategori === 'bhabinkamtibmas') color = 'blue'
+  else if (kategori === 'mobil_siaga') color = 'green'
   else if (kategori === 'pemadam_kebakaran') color = 'red'
+  else if (kategori === 'kantor_desa') color = 'orange'
   
   return L.icon({
     iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${color}.png`,
@@ -234,8 +235,18 @@ const selectLocation = (location) => {
   }
 }
 
-const initMap = () => {
-  if (!mapContainer.value || map) return
+const initMap = async () => {
+  if (!mapContainer.value || map || !import.meta.client) return
+
+  // Load Leaflet dynamically only on client-side
+  if (!L) {
+    try {
+      L = (await import('leaflet')).default
+    } catch (error) {
+      console.error('Failed to load Leaflet:', error)
+      return
+    }
+  }
 
   map = L.map(mapContainer.value).setView([-6.5641311, 106.6438673], 13)
 
@@ -255,7 +266,7 @@ const initMap = () => {
 }
 
 const updateMarkers = () => {
-  if (!map) return
+  if (!map || !L) return
 
   markers.forEach(marker => {
     map.removeLayer(marker)
@@ -264,9 +275,16 @@ const updateMarkers = () => {
 
   filteredLocations.value.forEach(location => {
     const icon = getMarkerIcon(location.kategori)
+    if (!icon) return
+    
+    let popupContent = `<b>${location.name}</b><br>${location.address || ''}`
+    if (location.phone) {
+      const whatsappLink = getWhatsAppLink(location.phone)
+      popupContent += `<br><a href="${whatsappLink}" target="_blank" style="color: #25D366; text-decoration: none;">📱 Hubungi via WhatsApp</a>`
+    }
     const marker = L.marker([location.lat, location.lng], { icon })
       .addTo(map)
-      .bindPopup(`<b>${location.name}</b><br>${location.address}`)
+      .bindPopup(popupContent)
     
     marker.on('click', () => {
       selectLocation(location)
@@ -342,7 +360,7 @@ const getMyLocation = () => {
     (position) => {
       const { latitude, longitude } = position.coords
       
-      if (map) {
+      if (map && L) {
         // Hapus marker lokasi sebelumnya jika ada
         if (currentLocationMarker) {
           map.removeLayer(currentLocationMarker)

@@ -13,7 +13,7 @@
         </div>
       </div>
       
-      <div class="px-5 pb-3">
+      <div v-if="!isRT" class="px-5 pb-3">
         <div class="flex items-center gap-2 overflow-x-auto scrollbar-hide">
           <button
             v-for="category in filterCategories"
@@ -117,7 +117,7 @@
       </div>
     </template>
 
-    <div class="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-20">
+    <div v-if="!isRT" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-20">
       <Button
         label="Buat Aduan"
         icon="pi pi-plus"
@@ -130,14 +130,24 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { Card, Button, Tag, ProgressSpinner } from 'primevue'
+import { useAduan } from '@/composables/useAduan'
+import { useAuth } from '@/composables/useAuth'
 
 const router = useRouter()
 const toast = useToast()
-const { getListAduan, getKategoriAduan } = useAduan()
+const { user } = useAuth()
+const { getListAduan, getListAduanRT, getKategoriAduan } = useAduan()
+
+const isRT = computed(() => {
+  const u: any = user.value
+  if (!u) return false
+  const roleId = u.role?.id ?? u.role_id ?? null
+  return roleId === 36
+})
 
 const aduanList = ref([])
 const loading = ref(false)
@@ -188,12 +198,17 @@ const fetchAduan = async (page = 0, append = false) => {
   }
 
   try {
-    const params = {
+    const params: any = {
       page: page || 0,
       per_page: selectedCategory.value === 'semua' ? 10 : -1
     }
 
-    const response = await getListAduan(params)
+    let response
+    if (isRT.value) {
+      response = await getListAduanRT(params)
+    } else {
+      response = await getListAduan(params)
+    }
 
     if (response && response.success) {
       let data = Array.isArray(response.data) ? response.data : []
@@ -259,24 +274,28 @@ const viewDetail = (id) => {
   router.push(`/services/aduan/complaint/masyarakat/${id}`)
 }
 
-const formatStatus = (status) => {
-  const statusMap = {
+const formatStatus = (status: string) => {
+  const statusMap: { [key: string]: string } = {
     'menunggu_verifikasi': 'Menunggu Verifikasi',
-    'diverifikasi': 'Diverifikasi',
+    'diverifikasi_rt': 'Diverifikasi RT',
+    'diverifikasi_admin': 'Diverifikasi Admin',
     'ditolak': 'Ditolak',
     'diproses': 'Diproses',
-    'selesai': 'Selesai'
+    'selesai': 'Selesai',
+    'dibatalkan': 'Dibatalkan'
   }
   return statusMap[status] || status
 }
 
-const getStatusSeverity = (status) => {
-  const severityMap = {
+const getStatusSeverity = (status: string) => {
+  const severityMap: { [key: string]: string } = {
     'menunggu_verifikasi': 'warning',
-    'diverifikasi': 'info',
+    'diverifikasi_rt': 'info',
+    'diverifikasi_admin': 'info',
     'ditolak': 'danger',
     'diproses': 'secondary',
-    'selesai': 'success'
+    'selesai': 'success',
+    'dibatalkan': 'danger'
   }
   return severityMap[status] || null
 }
