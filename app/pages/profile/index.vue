@@ -6,7 +6,9 @@
           <i class="pi pi-user text-blue-500" style="font-size: 2.5rem"></i>
         </div>
         <div class="mt-5">
-          <p class="text-base font-bold">{{ profileData?.nama || userData?.name || 'User' }}</p>
+          <p class="text-base font-bold">
+            {{ profileData?.nama || userData?.resident?.nama || userData?.name || 'User' }}
+          </p>
           <p class="text-xs text-gray-500">{{ userData?.email || '' }}</p>
           <p v-if="profileData?.nik" class="text-xs text-gray-400 mt-1">NIK: {{ profileData.nik }}</p>
         </div>
@@ -16,17 +18,54 @@
       <Card class="border border-gray-200" v-if="profileData">
         <template #content>
           <div class="space-y-3">
-            <div v-if="profileData.tempat_lahir || profileData.tanggal_lahir" class="flex flex-col gap-2">
+            <div
+              v-if="profileData.tempat_lahir || profileData.tanggal_lahir"
+              class="flex flex-col gap-2"
+            >
               <p class="text-xs text-gray-500">Tempat, Tanggal Lahir</p>
-              <p class="text-sm">{{ profileData.tempat_lahir || '-' }}, {{ profileData.tanggal_lahir || '-' }}</p>
+              <p class="text-sm">
+                {{ profileData.tempat_lahir || '-' }},
+                {{ profileData.tanggal_lahir || '-' }}
+              </p>
             </div>
+
             <div v-if="profileData.jenis_kelamin" class="flex flex-col gap-2">
               <p class="text-xs text-gray-500">Jenis Kelamin</p>
               <p class="text-sm">{{ profileData.jenis_kelamin }}</p>
             </div>
+
             <div v-if="profileData.kartu_keluarga" class="flex flex-col gap-2">
               <p class="text-xs text-gray-500">Kartu Keluarga</p>
               <p class="text-sm">{{ profileData.kartu_keluarga }}</p>
+            </div>
+
+            <div v-if="profileData.family_status_text || profileData.family_status" class="flex flex-col gap-2">
+              <p class="text-xs text-gray-500">Status Keluarga</p>
+              <p class="text-sm">
+                {{ profileData.family_status_text || profileData.family_status || '-' }}
+              </p>
+            </div>
+
+            <div v-if="profileData.status_kawin_text || profileData.status_kawin" class="flex flex-col gap-2">
+              <p class="text-xs text-gray-500">Status Perkawinan</p>
+              <p class="text-sm">
+                {{ profileData.status_kawin_text || profileData.status_kawin || '-' }}
+              </p>
+            </div>
+
+            <div v-if="profileData.pendidikan" class="flex flex-col gap-2">
+              <p class="text-xs text-gray-500">Pendidikan</p>
+              <p class="text-sm">{{ profileData.pendidikan }}</p>
+            </div>
+
+            <div v-if="profileData.agama" class="flex flex-col gap-2">
+              <p class="text-xs text-gray-500">Agama</p>
+              <p class="text-sm">{{ profileData.agama }}</p>
+            </div>
+
+            <div v-if="profileData.pekerjaan" class="flex flex-col gap-2">
+              <p class="text-xs text-gray-500">Pekerjaan</p>
+              <p class="text-sm">{{ profileData.pekerjaan }}</p>
             </div>
           </div>
         </template>
