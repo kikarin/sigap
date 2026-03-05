@@ -137,6 +137,7 @@ export default defineNuxtConfig({
       globPatterns: ['**/*.{js,css,html}'],
       globIgnores: ['**/node_modules/**/*', '**/.nuxt/**/*', '**/.output/**/*'],
       maximumFileSizeToCacheInBytes: 5000000,
+      importScripts: ['/sw-push.js'],
       runtimeCaching: [
         {
           urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/,

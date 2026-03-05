@@ -71,6 +71,9 @@
         </template>
       </Card>
 
+      <!-- Push Notification Setup -->
+      <PushNotificationSetup />
+
       <!-- Menu Lainnya -->
       <Card class="border border-gray-200">
         <template #content>
