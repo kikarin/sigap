@@ -1,50 +1,42 @@
-export default defineNuxtPlugin(async () => {
+export default defineNuxtPlugin(() => {
   if (typeof window === 'undefined') return
 
-  const pushNotification = usePushNotification()
-  
-  // Cek apakah browser support
-  if (!pushNotification.isSupported()) {
-    return
-  }
+  queueMicrotask(async () => {
+    const pushNotification = usePushNotification()
 
-  // Tunggu service worker ready
-  if ('serviceWorker' in navigator) {
-    try {
-      await navigator.serviceWorker.ready
-    } catch (error) {
-      console.error('Service worker not ready:', error)
+    if (!pushNotification.isSupported()) {
       return
     }
-  }
 
-  // Cek apakah user sudah login
-  const token = localStorage.getItem('auth_token')
-  if (!token) {
-    return
-  }
+    const token = localStorage.getItem('auth_token')
+    if (!token) {
+      return
+    }
 
-  // Delay sedikit untuk memastikan service worker sudah ready
-  setTimeout(async () => {
     try {
-      // Cek permission
+      if ('serviceWorker' in navigator) {
+        await Promise.race([
+          navigator.serviceWorker.ready,
+          new Promise((resolve) => setTimeout(resolve, 4000))
+        ])
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
       const permission = pushNotification.checkPermission()
       if (permission !== 'granted') {
         return
       }
 
-      // Cek apakah sudah subscribe
       const subscribed = await pushNotification.isSubscribed()
       if (subscribed) {
         return
       }
 
-      // Auto-subscribe jika permission granted tapi belum subscribe
       await pushNotification.subscribeToPush()
       console.log('Auto-subscribed to push notifications')
     } catch (error) {
       console.error('Auto-subscribe failed:', error)
-      // Silent fail - user bisa subscribe manual nanti
     }
-  }, 2000) // Delay 2 detik untuk memastikan semua sudah ready
+  })
 })

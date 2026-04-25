@@ -45,9 +45,21 @@ export const useAuth = () => {
       const storedUser = localStorage.getItem('user')
       
       if (storedToken && storedUser) {
-        token.value = storedToken
-        user.value = JSON.parse(storedUser)
-        isAuthenticated.value = true
+        try {
+          token.value = storedToken
+          user.value = JSON.parse(storedUser)
+          isAuthenticated.value = true
+        } catch (error) {
+          if (process.client) {
+            localStorage.removeItem('user')
+            localStorage.removeItem('auth_token')
+            localStorage.removeItem('isAuthenticated')
+          }
+          token.value = null
+          user.value = null
+          isAuthenticated.value = false
+          return
+        }
         
         // Verify token dengan API
         try {
